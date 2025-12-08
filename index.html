@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Säkra Seniorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Atkinson Hyperlegible', sans-serif; 
+            background-image: url('bakgrund3.png'); 
+            background-size: cover; 
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #f0f9ff;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark body {
+            background-image: none;
+            background-color: #111827;
+            color: #f3f4f6;
+        }
+        /* Skuggor */
+        .custom-shadow {
+            box-shadow: 6px 6px 20px rgba(0, 0, 0, 0.15) !important;
+            transition: all 0.3s ease;
+        }
+        .dark .custom-shadow {
+            box-shadow: 6px 6px 20px rgba(255, 255, 255, 0.15) !important;
+            border: 1px solid #374151;
+        }
+        .custom-shadow:hover {
+            box-shadow: 8px 8px 25px rgba(0, 0, 0, 0.25) !important;
+            transform: translateY(-2px);
+        }
+        .dark .custom-shadow:hover {
+            box-shadow: 8px 8px 25px rgba(255, 255, 255, 0.25) !important;
+            border-color: #60a5fa;
+        }
+        .shadow-2xl, .shadow-xl, .shadow-md { box-shadow: none !important; }
+        
+        /* Språkinställningar */
+        body.lang-ar { font-family: 'Noto Naskh Arabic', serif; direction: rtl; }
+        body.lang-ar .answer-button, body.lang-ar .level-button { text-align: right; }
+        #language-menu, #nav-buttons { font-family: 'Atkinson Hyperlegible', sans-serif !important; direction: ltr !important; }
+        
+        /* Knappar */
+        .level-button { transition: transform 0.2s; }
+        .level-button:hover { transform: scale(1.02); }
+        
+        .answer-button {
+            padding: 1rem; margin-top: 0.8rem; border-radius: 0.5rem;
+            font-size: 1.1rem; font-weight: 600; width: 100%; text-align: left;
+            transition: all 0.2s; border: 2px solid #e5e7eb; background: white; color: #1f2937;
+        }
+        .dark .answer-button { background-color: #374151; border-color: #4b5563; color: #f3f4f6; }
+        .dark .answer-button:hover:not(:disabled) { background-color: #4b5563; border-color: #60a5fa; }
+        .answer-button:hover:not(:disabled) { border-color: #4f46e5; background-color: #eef2ff; }
+        
+        .correct { background-color: #22c55e !important; color: white !important; border-color: #22c55e !important; }
+        .incorrect { background-color: #ef4444 !important; color: white !important; border-color: #ef4444 !important; }
+        .disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        #question-image { width: 100%; height: 300px; object-fit: contain; object-position: center; border-radius: 0.5rem; margin-bottom: 1rem; display: none; background-color: transparent; }
+        
+        /* Animationer */
+        @keyframes virus-fill { 0% { width: 0%; } 100% { width: 100%; } }
+        .virus-bar-animation { animation: virus-fill 10s linear forwards; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); } 20%, 40%, 60%, 80% { transform: translateX(5px); } }
+        .shake-screen { animation: shake 0.5s infinite; }
+        
+        /* Tal-animation */
+        .speaking { animation: pulse-speak 1.5s infinite; background-color: #dbeafe !important; border-color: #4f46e5 !important; color: #1e40af !important; }
+        .dark .speaking { background-color: #1e3a8a !important; color: #bfdbfe !important; }
+        @keyframes pulse-speak { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body class="p-4 sm:p-8 min-h-screen flex flex-col items-center justify-center text-gray-900 dark:text-gray-100">
+
+
+    <div id="main-card" class="relative w-full max-w-xl bg-white dark:bg-gray-800 custom-shadow rounded-2xl p-6 sm:p-8 border-t-8 border-indigo-600 dark:border-indigo-400 transition-colors duration-300">
+        
+        <div id="theme-toggle" class="absolute top-4 left-4 z-10" dir="ltr">
+            <div class="relative group cursor-pointer" onclick="toggleTheme()">
+                <button class="text-3xl hover:scale-110 transition p-1 rounded-full bg-white/50 dark:bg-black/50 border border-gray-200 dark:border-gray-600">
+                    🔘
+                </button>
+                <span id="txt-theme-label" class="absolute left-1/2 -translate-x-1/2 top-full mt-1 text-[10px] font-bold text-gray-500 dark:text-gray-400 bg-white/80 dark:bg-black/50 px-1 rounded w-max">
+                    Utseende
+                </span>
+            </div>
+        </div>
+
+        <div id="language-menu" class="flex justify-center gap-4 mb-6 border-b dark:border-gray-700 pb-4 flex-wrap pt-12 sm:pt-0 pl-16 sm:pl-0 pr-16 sm:pr-0">
+            <button onclick="setLanguage('sv')" class="hover:scale-110 transition flex flex-col items-center gap-1 opacity-80 hover:opacity-100">
+                <img src="https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/se.svg" alt="Svenska" class="w-10 h-auto shadow-md rounded border border-gray-200">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400">SE</span>
+            </button>
+            <button onclick="setLanguage('en')" class="hover:scale-110 transition flex flex-col items-center gap-1 opacity-80 hover:opacity-100">
+                <img src="https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/gb.svg" alt="English" class="w-10 h-auto shadow-md rounded border border-gray-200">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400">EN</span>
+            </button>
+            <button onclick="setLanguage('fi')" class="hover:scale-110 transition flex flex-col items-center gap-1 opacity-80 hover:opacity-100">
+                <img src="https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/fi.svg" alt="Suomi" class="w-10 h-auto shadow-md rounded border border-gray-200">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400">FI</span>
+            </button>
+            <button onclick="setLanguage('es')" class="hover:scale-110 transition flex flex-col items-center gap-1 opacity-80 hover:opacity-100">
+                <img src="https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/es.svg" alt="Español" class="w-10 h-auto shadow-md rounded border border-gray-200">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400">ES</span>
+            </button>
+            <button onclick="setLanguage('ar')" class="hover:scale-110 transition flex flex-col items-center gap-1 opacity-80 hover:opacity-100">
+                <img src="https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/sa.svg" alt="Arabiska" class="w-10 h-auto shadow-md rounded border border-gray-200">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400">AR</span>
+            </button>
+             <button onclick="setLanguage('tr')" class="hover:scale-110 transition flex flex-col items-center gap-1 opacity-80 hover:opacity-100">
+                <img src="https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/tr.svg" alt="Turkiska" class="w-10 h-auto shadow-md rounded border border-gray-200">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400">TR</span>
+            </button>
+        </div>
+
+        <div id="trap-envelope" onclick="openTrap()" class="hidden absolute -top-6 -right-6 cursor-pointer z-50 animate-bounce transition-transform hover:scale-110">
+            <div class="text-6xl filter drop-shadow-lg">📩</div>
+            <div class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-8 h-8 flex items-center justify-center rounded-full border-2 border-white">1</div>
+            <div id="msg-badge-text" class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded shadow mt-1 text-center border border-yellow-300">Läs!</div>
+        </div>
+        
+        <div id="start-screen" class="text-center">
+            <h1 id="txt-title" class="text-3xl font-bold text-indigo-900 dark:text-indigo-300 mb-4">Säkra Seniorer 👋</h1>
+            <p id="txt-subtitle" class="text-gray-600 dark:text-gray-300 mb-8 text-lg">Välkommen! För att ge dig rätt frågor, välj hur van du är vid teknik:</p>
+
+            <div class="space-y-6">
+                <button onclick="startLevel('low')" class="custom-shadow level-button w-full bg-green-50 hover:bg-green-100 dark:bg-green-900 dark:hover:bg-green-800 border-2 border-green-500 p-4 rounded-xl flex items-center gap-4 text-left transition-all duration-300">
+                    <div class="text-4xl">🌱</div>
+                    <div>
+                        <h3 id="txt-level-low-title" class="font-bold text-green-800 dark:text-green-200 text-lg">Nybörjare</h3>
+                        <p id="txt-level-low-desc" class="text-sm text-green-700 dark:text-green-300">Jag använder sällan internet eller BankID.</p>
+                    </div>
+                </button>
+
+                <button onclick="startLevel('medium')" class="custom-shadow level-button w-full bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900 dark:hover:bg-yellow-800 border-2 border-yellow-500 p-4 rounded-xl flex items-center gap-4 text-left transition-all duration-300">
+                    <div class="text-4xl">📱</div>
+                    <div>
+                        <h3 id="txt-level-med-title" class="font-bold text-yellow-800 dark:text-yellow-200 text-lg">Vardagsanvändare</h3>
+                        <p id="txt-level-med-desc" class="text-sm text-yellow-700 dark:text-yellow-300">Jag betalar räkningar och kollar Facebook.</p>
+                    </div>
+                </button>
+
+                <button onclick="startLevel('high')" class="custom-shadow level-button w-full bg-red-50 hover:bg-red-100 dark:bg-red-900 dark:hover:bg-red-800 border-2 border-red-500 p-4 rounded-xl flex items-center gap-4 text-left transition-all duration-300">
+                    <div class="text-4xl">🚀</div>
+                    <div>
+                        <h3 id="txt-level-high-title" class="font-bold text-red-800 dark:text-red-200 text-lg">Expert</h3>
+                        <p id="txt-level-high-desc" class="text-sm text-red-700 dark:text-red-300">Jag använder mobilen till allt varje dag.</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <div id="quiz-container" class="hidden">
+            
+            <div class="grid grid-cols-3 items-center text-sm font-bold text-gray-400 mb-4 uppercase tracking-wide">
+                <span class="text-left"><span id="txt-q-num">Fråga</span> <span id="current-question-index">1</span></span>
+                
+                <div class="text-center flex flex-col items-center">
+                    <button id="home-button" onclick="goHome()" class="hidden text-3xl hover:scale-110 transition pb-1 dark:text-white" title="Till Startsidan">
+                        🏠
+                    </button>
+                    <span id="txt-home-lbl" class="text-[10px] text-gray-500 uppercase font-bold hidden">Hem</span>
+                </div>
+
+                <span class="text-right"><span id="txt-q-total">Totalt</span> <span id="total-questions"></span></span>
+            </div>
+
+            <div class="flex justify-center mb-4">
+                <button id="speak-btn" onclick="toggleSpeech()" class="flex items-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 rounded-full font-bold transition-all border-2 border-indigo-100 dark:bg-indigo-900 dark:text-indigo-100 dark:border-indigo-700 shadow-sm">
+                    <span class="text-xl">🔊</span>
+                    <span id="txt-read-aloud">Läs upp</span>
+                </button>
+            </div>
+
+            <img id="question-image" src="" alt="Bild">
+            <h2 id="question-text" class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6 leading-tight"></h2>
+            
+            <div id="answer-buttons-container" class="flex flex-col"></div>
+            <div id="feedback-message" class="mt-6 p-4 rounded-lg text-center font-bold hidden text-lg"></div>
+            
+            <button id="next-button" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg hidden" onclick="loadNextQuestion()">
+                Nästa &rarr;
+            </button>
+        </div>
+
+        <div id="results-view" class="hidden text-center">
+            <h2 id="txt-res-title" class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">Bra jobbat! 🎉</h2>
+            <p class="text-xl mb-6"><span id="txt-res-score">Du fick</span> <span id="score" class="font-bold text-indigo-600 dark:text-indigo-400">0</span> <span id="txt-res-of">av</span> <span id="max-score"></span>.</p>
+            
+            <div class="bg-indigo-50 dark:bg-gray-700 p-6 rounded-lg text-left mb-8">
+                <h3 id="txt-res-info-title" class="font-bold text-indigo-900 dark:text-indigo-200 mb-2">Kom ihåg:</h3>
+                <ul id="txt-res-info-list" class="list-disc list-inside text-indigo-800 dark:text-gray-300 space-y-2">
+                    <li>Logga aldrig in på uppmaning av andra.</li>
+                    <li>Lägg på luren om du känner dig stressad.</li>
+                </ul>
+            </div>
+
+            <button id="txt-btn-restart" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded-lg" onclick="goHome()">
+                Starta om / Byt nivå
+            </button>
+        </div>
+    </div>
+
+    <div id="trap-modal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-[100] p-4" style="display: none;">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full relative shadow-2xl dark:bg-gray-800">
+            <div id="trap-form-view">
+                <h2 id="txt-trap-title" class="text-2xl font-bold text-indigo-900 dark:text-indigo-300 mb-2">Viktigt meddelande!</h2>
+                <p id="txt-trap-desc" class="mb-4 text-gray-600 dark:text-gray-400 text-sm">Verifiera din identitet för att läsa.</p>
+                <input type="text" class="w-full p-3 border-2 border-gray-300 rounded-lg mb-3 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Namn / Name">
+                <input type="tel" class="w-full p-3 border-2 border-gray-300 rounded-lg mb-6 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Telefon / Phone">
+                <button onclick="triggerTrap()" id="txt-trap-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl text-xl shadow-md transition-transform hover:scale-105">
+                    VERIFIERA NU
+                </button>
+            </div>
+
+            <div id="trap-shock-view" class="hidden text-center py-10 bg-black rounded-xl border-4 border-red-600 shake-screen shadow-2xl relative overflow-hidden">
+                <div class="absolute inset-0 bg-red-900/20 animate-pulse"></div>
+                <div class="relative z-10">
+                    <div class="text-6xl mb-4 animate-bounce">💀</div>
+                    <h2 id="txt-hack-title" class="text-3xl font-black text-red-500 mb-2 tracking-widest">HACKAD!</h2>
+                    <p id="txt-hack-desc" class="text-white font-mono mb-6">Överför data...</p>
+                    <div class="w-64 h-6 bg-gray-700 rounded-full mx-auto overflow-hidden border border-gray-500 relative">
+                        <div class="h-full bg-red-600 virus-bar-animation"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="trap-lesson-view" class="hidden text-center bg-red-100 p-4 rounded-xl border-4 border-red-500 shadow-xl dark:bg-red-900">
+                <div class="text-5xl mb-2">⚠️</div>
+                <h2 id="txt-stop-title" class="text-3xl font-bold text-red-700 dark:text-red-300 mb-4">STOPP!</h2>
+                <p id="txt-stop-desc" class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">Så här enkelt är det att bli lurad.</p>
+                <button onclick="goHome()" id="txt-stop-btn" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded-lg shadow-lg">
+                    Jag förstår
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ---------------------------------------------------------
+        // APP LOGIK & INSTÄLLNINGAR
+        // ---------------------------------------------------------
+        let currentLang = 'sv';
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let quizActive = false;
+        let selectedLevel = 'low';
+        let isSpeaking = false;
+
+        // Ljud
+        let audioPlayer = new Audio();
+        const synth = window.speechSynthesis;
+        let utterance = null;
+        let voices = [];
+
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => { voices = synth.getVoices(); };
+        }
+        setTimeout(() => { voices = synth.getVoices(); }, 100);
+
+        function setVoice(utterance, langCode) {
+            const langMap = {
+                'sv': 'sv-SE', 'en': 'en-US', 'fi': 'fi-FI', 
+                'es': 'es-ES', 'ar': 'ar', 'tr': 'tr-TR'
+            };
+            
+            const targetLang = langMap[langCode] || 'sv-SE';
+            utterance.lang = targetLang;
+            const exactVoice = voices.find(v => v.lang === targetLang);
+            const fallbackVoice = voices.find(v => v.lang.includes(langCode));
+
+            if (exactVoice) utterance.voice = exactVoice;
+            else if (fallbackVoice) utterance.voice = fallbackVoice;
+        }
+
+        const elements = {
+            startScreen: document.getElementById('start-screen'),
+            quizContainer: document.getElementById('quiz-container'),
+            resultsView: document.getElementById('results-view'),
+            trapEnvelope: document.getElementById('trap-envelope'),
+            qText: document.getElementById('question-text'),
+            qImage: document.getElementById('question-image'),
+            ansContainer: document.getElementById('answer-buttons-container'),
+            feedback: document.getElementById('feedback-message'),
+            nextBtn: document.getElementById('next-button'),
+            qIndex: document.getElementById('current-question-index'),
+            qTotal: document.getElementById('total-questions'),
+            score: document.getElementById('score'),
+            maxScore: document.getElementById('max-score'),
+            languageMenu: document.getElementById('language-menu'),
+            homeButton: document.getElementById('home-button'),
+            homeLabel: document.getElementById('txt-home-lbl'), 
+            themeToggle: document.getElementById('theme-toggle'),
+            trapModal: document.getElementById('trap-modal'),
+            trapForm: document.getElementById('trap-form-view'),
+            trapShock: document.getElementById('trap-shock-view'),
+            trapLesson: document.getElementById('trap-lesson-view'),
+            speakBtn: document.getElementById('speak-btn'),
+            readAloudLabel: document.getElementById('txt-read-aloud') 
+        };
+
+        function toggleSpeech() {
+            if (isSpeaking) {
+                stopAllSound();
+            } else {
+                startSpeech();
+            }
+        }
+
+        function stopAllSound() {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            synth.cancel();
+            isSpeaking = false;
+            elements.speakBtn.classList.remove('speaking');
+        }
+
+        function startSpeech() {
+            isSpeaking = true;
+            elements.speakBtn.classList.add('speaking');
+            let textToSpeak = "";
+            let mp3Filename = "";
+
+            if (!elements.quizContainer.classList.contains('hidden')) {
+                const q = currentQuestions[currentQuestionIndex];
+                textToSpeak = q.question + ". ";
+                q.answers.forEach((a, idx) => textToSpeak += (idx + 1) + ". " + a.text + ". ");
+                if (!elements.feedback.classList.contains('hidden')) textToSpeak = elements.feedback.textContent;
+                mp3Filename = `audio/${currentLang}_${selectedLevel}_${currentQuestionIndex}.mp3`;
+            } else if (!elements.startScreen.classList.contains('hidden')) {
+                 const t = translations[currentLang] || translations['sv'];
+                 textToSpeak = `${t.title}. ${t.subtitle}`;
+            }
+
+            if (mp3Filename) {
+                audioPlayer.src = mp3Filename;
+                audioPlayer.play().then(() => {
+                    audioPlayer.onended = () => { stopAllSound(); };
+                }).catch(() => speakWithRobot(textToSpeak));
+            } else {
+                speakWithRobot(textToSpeak);
+            }
+        }
+
+        function speakWithRobot(text) {
+            if (!text) { stopAllSound(); return; }
+            utterance = new SpeechSynthesisUtterance(text);
+            setVoice(utterance, currentLang);
+            utterance.onend = () => { stopAllSound(); };
+            synth.speak(utterance);
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            stopAllSound();
+            
+            const t = translations[lang] || translations['sv'];
+            
+            if(lang === 'ar') document.body.classList.add('lang-ar');
+            else document.body.classList.remove('lang-ar');
+
+            document.getElementById('txt-title').textContent = t.title;
+            document.getElementById('txt-subtitle').textContent = t.subtitle;
+            document.getElementById('txt-level-low-title').textContent = t.lowTitle;
+            document.getElementById('txt-level-low-desc').textContent = t.lowDesc;
+            document.getElementById('txt-level-med-title').textContent = t.medTitle;
+            document.getElementById('txt-level-med-desc').textContent = t.medDesc;
+            document.getElementById('txt-level-high-title').textContent = t.highTitle;
+            document.getElementById('txt-level-high-desc').textContent = t.highDesc;
+            
+            document.getElementById('txt-q-num').textContent = t.qNum;
+            document.getElementById('txt-q-total').textContent = t.qTotal;
+            elements.nextBtn.innerHTML = (lang === 'ar' ? '&larr; ' : '') + (lang === 'en' ? "Next" : (lang === 'fi' ? "Seuraava" : (lang === 'es' ? "Siguiente" : (lang === 'ar' ? "التالي" : "Nästa")))) + (lang !== 'ar' ? ' &rarr;' : '');
+            
+            document.getElementById('txt-res-title').textContent = t.resTitle;
+            document.getElementById('txt-res-score').textContent = t.resScore;
+            document.getElementById('txt-res-of').textContent = t.resOf;
+            document.getElementById('txt-res-info-title').textContent = t.resInfoTitle;
+            document.getElementById('txt-res-info-list').innerHTML = t.resInfoList;
+            document.getElementById('txt-btn-restart').textContent = t.restartBtn;
+
+            document.getElementById('txt-trap-title').textContent = t.trapTitle;
+            document.getElementById('txt-trap-desc').textContent = t.trapDesc;
+            document.getElementById('txt-trap-btn').textContent = t.trapBtn;
+            document.getElementById('txt-hack-title').textContent = t.hackTitle;
+            document.getElementById('txt-hack-desc').textContent = t.hackDesc;
+            document.getElementById('txt-stop-title').textContent = t.stopTitle;
+            document.getElementById('txt-stop-desc').textContent = t.stopDesc;
+            document.getElementById('txt-stop-btn').textContent = t.stopBtn;
+            document.getElementById('msg-badge-text').textContent = t.msgBadge;
+            document.getElementById('txt-theme-label').textContent = t.themeLabel;
+            
+            elements.readAloudLabel.textContent = t.readAloud;
+            elements.homeLabel.textContent = t.home;
+        }
+
+        function goHome() {
+            stopAllSound();
+            elements.quizContainer.classList.add('hidden');
+            elements.resultsView.classList.add('hidden');
+            elements.trapEnvelope.classList.add('hidden');
+            
+            elements.trapModal.classList.add('hidden');
+            elements.trapModal.style.display = 'none';
+            
+            elements.trapForm.classList.remove('hidden');
+            elements.trapShock.classList.add('hidden');
+            elements.trapLesson.classList.add('hidden');
+
+            elements.startScreen.classList.remove('hidden');
+            elements.languageMenu.classList.remove('hidden'); 
+            elements.homeButton.classList.add('hidden');
+            elements.homeLabel.classList.add('hidden'); 
+            elements.themeToggle.classList.remove('hidden');
+        }
+
+        function startLevel(level) {
+            selectedLevel = level;
+            const qData = questionsData[currentLang] || questionsData['sv'];
+            let questions = qData[level];
+            
+            if (!questions || questions.length === 0) {
+                questions = questionsData['sv'][level];
+            }
+            currentQuestions = questions;
+
+            elements.startScreen.classList.add('hidden');
+            elements.languageMenu.classList.add('hidden'); 
+            elements.homeButton.classList.remove('hidden'); 
+            elements.homeLabel.classList.remove('hidden'); 
+            elements.quizContainer.classList.remove('hidden');
+            elements.themeToggle.classList.add('hidden');
+            
+            currentQuestionIndex = 0;
+            score = 0;
+            elements.qTotal.textContent = currentQuestions.length;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            stopAllSound();
+            quizActive = true;
+            elements.feedback.classList.add('hidden');
+            elements.nextBtn.classList.add('hidden');
+
+            const currentQuestion = currentQuestions[currentQuestionIndex];
+            elements.qIndex.textContent = currentQuestionIndex + 1;
+            elements.qText.textContent = currentQuestion.question;
+
+            if (selectedLevel === 'high' && currentQuestionIndex === 2) {
+                elements.trapEnvelope.classList.remove('hidden');
+            } else {
+                elements.trapEnvelope.classList.add('hidden');
+            }
+
+            if (currentQuestion.image && currentQuestion.image.length > 3) {
+                elements.qImage.src = currentQuestion.image;
+                elements.qImage.style.display = "block";
+            } else {
+                elements.qImage.style.display = "none";
+            }
+
+            elements.ansContainer.innerHTML = '';
+            currentQuestion.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.textContent = answer.text;
+                button.classList.add('answer-button', 'custom-shadow'); 
+                button.onclick = () => selectAnswer(button, answer.isCorrect, answer.feedback);
+                elements.ansContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedButton, isCorrect, feedback) {
+            if (!quizActive) return;
+            quizActive = false;
+            stopAllSound();
+
+            Array.from(elements.ansContainer.children).forEach(button => {
+                button.disabled = true;
+                button.classList.add('disabled');
+            });
+
+            if (isCorrect) {
+                selectedButton.classList.add('correct');
+                score++;
+                elements.feedback.className = 'mt-6 p-4 rounded-lg text-center font-bold bg-green-100 text-green-800 border-4 border-green-500 shadow-xl shadow-green-200 custom-shadow';
+                elements.feedback.innerHTML = "✅ " + feedback;
+            } else {
+                selectedButton.classList.add('incorrect');
+                const correctButton = Array.from(elements.ansContainer.children).find((btn, i) => currentQuestions[currentQuestionIndex].answers[i].isCorrect);
+                if (correctButton) correctButton.classList.add('correct');
+                
+                elements.feedback.className = 'mt-6 p-4 rounded-lg text-center font-bold bg-red-100 text-red-800 border-4 border-red-500 shadow-xl shadow-red-200 custom-shadow';
+                elements.feedback.innerHTML = "❌ " + feedback;
+            }
+            elements.feedback.classList.remove('hidden');
+            elements.nextBtn.classList.remove('hidden');
+        }
+
+        function loadNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            elements.quizContainer.classList.add('hidden');
+            elements.resultsView.classList.remove('hidden');
+            elements.trapEnvelope.classList.add('hidden');
+            elements.score.textContent = score;
+            elements.maxScore.textContent = currentQuestions.length;
+        }
+
+        function openTrap() { 
+            elements.trapModal.classList.remove('hidden'); 
+            elements.trapModal.style.display = 'flex'; 
+        }
+        
+        function triggerTrap() {
+            elements.trapForm.classList.add('hidden');
+            elements.trapShock.classList.remove('hidden');
+            setTimeout(() => {
+                elements.trapShock.classList.add('hidden');
+                elements.trapLesson.classList.remove('hidden');
+            }, 10000); 
+        }
+
+         const translations = {
+            sv: {
+                title: "Säkra Seniorer 👋", subtitle: "Välkommen! Välj hur van du är vid teknik:",
+                lowTitle: "Nybörjare", lowDesc: "Använder sällan internet.",
+                medTitle: "Vardagsanvändare", medDesc: "Betalar räkningar och Facebook.",
+                highTitle: "Expert", highDesc: "Använder mobilen till allt.",
+                qNum: "Fråga", qTotal: "Totalt",
+                resTitle: "Bra jobbat! 🎉", resScore: "Du fick", resOf: "av",
+                resInfoTitle: "Kom ihåg:", resInfoList: "<li>Logga aldrig in på uppmaning.</li><li>Lägg på luren om du känner dig stressad.</li>",
+                restartBtn: "Starta om",
+                trapTitle: "Viktigt meddelande!", trapDesc: "Verifiera din identitet.", trapBtn: "VERIFIERA NU",
+                hackTitle: "HACKAD!", hackDesc: "Överför data...",
+                stopTitle: "STOPP!", stopDesc: "Så här enkelt är det att bli lurad.", stopBtn: "Jag förstår",
+                msgBadge: "Läs!", themeLabel: "Utseende"
+            },
+            en: {
+                title: "Safe Seniors 👋", subtitle: "Welcome! Choose your tech experience:",
+                lowTitle: "Beginner", lowDesc: "Rarely use the internet.",
+                medTitle: "Daily User", medDesc: "Pay bills and check Facebook.",
+                highTitle: "Expert", highDesc: "Use mobile for everything.",
+                qNum: "Question", qTotal: "Total",
+                resTitle: "Great Job! 🎉", resScore: "You got", resOf: "of",
+                resInfoTitle: "Remember:", resInfoList: "<li>Never log in on request.</li><li>Hang up if you feel stressed.</li>",
+                restartBtn: "Restart",
+                trapTitle: "Important Message!", trapDesc: "Verify your identity.", trapBtn: "VERIFY NOW",
+                hackTitle: "HACKED!", hackDesc: "Transferring data...",
+                stopTitle: "STOP!", stopDesc: "It's this easy to get scammed.", stopBtn: "I understand",
+                msgBadge: "Read!", themeLabel: "Theme"
+            },
+            fi: {
+                title: "Turvalliset Seniorit 👋", subtitle: "Tervetuloa! Valitse kokemuksesi:",
+                lowTitle: "Aloittelija", lowDesc: "Käytän internetiä harvoin.",
+                medTitle: "Peruskäyttäjä", medDesc: "Maksan laskuja ja käytän Facebookia.",
+                highTitle: "Asiantuntija", highDesc: "Hoidan kaiken puhelimella.",
+                qNum: "Kysymys", qTotal: "Yhteensä",
+                resTitle: "Hyvää työtä! 🎉", resScore: "Sait", resOf: "/",
+                resInfoTitle: "Muista:", resInfoList: "<li>Älä kirjaudu sisään pyynnöstä.</li><li>Sulje puhelin, jos ahdistaa.</li>",
+                restartBtn: "Aloita alusta",
+                trapTitle: "Tärkeä viesti!", trapDesc: "Vahvista henkilöllisyytesi.", trapBtn: "VAHVISTA NYT",
+                hackTitle: "HAKKEROITU!", hackDesc: "Siirretään tietoja...",
+                stopTitle: "SEIS!", stopDesc: "Näin helppoa on tulla huijatuksi.", stopBtn: "Ymmärrän",
+                msgBadge: "Lue!", themeLabel: "Teema"
+            },
+            es: {
+                title: "Mayores Seguros 👋", subtitle: "¡Bienvenido! Elige tu nivel:",
+                lowTitle: "Principiante", lowDesc: "Raramente uso internet.",
+                medTitle: "Usuario Diario", medDesc: "Pago facturas y uso Facebook.",
+                highTitle: "Experto", highDesc: "Uso el móvil para todo.",
+                qNum: "Pregunta", qTotal: "Total",
+                resTitle: "¡Buen trabajo! 🎉", resScore: "Tienes", resOf: "de",
+                resInfoTitle: "Recuerda:", resInfoList: "<li>Nunca inicies sesión si te lo piden.</li><li>Cuelga si sientes presión.</li>",
+                restartBtn: "Reiniciar",
+                trapTitle: "¡Mensaje Importante!", trapDesc: "Verifica tu identidad.", trapBtn: "VERIFICAR AHORA",
+                hackTitle: "¡HACKEADO!", hackDesc: "Transfiriendo datos...",
+                stopTitle: "¡ALTO!", stopDesc: "Es así de fácil ser estafado.", stopBtn: "Entiendo",
+                msgBadge: "¡Leer!", themeLabel: "Tema"
+            },
+            ar: {
+                title: "كبار السن الآمنون 👋", subtitle: "أهلاً بك! اختر مستوى خبرتك:",
+                lowTitle: "مبتدأ", lowDesc: "نادراً ما أستخدم الإنترنت.",
+                medTitle: "مستخدم يومي", medDesc: "أدفع الفواتير واستخدم فيسبوك.",
+                highTitle: "خبير", highDesc: "أستخدم الهاتف لكل شيء.",
+                qNum: "سؤال", qTotal: "الإجمالي",
+                resTitle: "عمل رائع! 🎉", resScore: "نتيجتك", resOf: "من",
+                resInfoTitle: "تذكر:", resInfoList: "<li>لا تقم بتسجيل الدخول بطلب من أحد.</li><li>أغلق الهاتف إذا شعرت بالضغط.</li>",
+                restartBtn: "ابدأ من جديد",
+                trapTitle: "رسالة مهمة!", trapDesc: "أكد هويتك للقراءة.", trapBtn: "تحقق الآن",
+                hackTitle: "تم الاختراق!", hackDesc: "جاري نقل البيانات...",
+                stopTitle: "توقف!", stopDesc: "من السهل جداً التعرض للاحتيال.", stopBtn: "أنا أفهم",
+                msgBadge: "اقرأ!", themeLabel: "مظهر"
+            },
+            tr: {
+                title: "Güvenli Büyükler 👋", subtitle: "Hoş geldiniz! Deneyiminizi seçin:",
+                lowTitle: "Yeni Başlayan", lowDesc: "İnterneti nadiren kullanıyorum.",
+                medTitle: "Günlük Kullanıcı", medDesc: "Faturaları öderim, Facebook kullanırım.",
+                highTitle: "Uzman", highDesc: "Her şey için cep telefonu kullanırım.",
+                qNum: "Soru", qTotal: "Toplam",
+                resTitle: "Tebrikler! 🎉", resScore: "Puanınız:", resOf: "/",
+                resInfoTitle: "Unutmayın:", resInfoList: "<li>İstek üzerine asla giriş yapmayın.</li><li>Baskı hissederseniz telefonu kapatın.</li>",
+                restartBtn: "Yeniden Başlat",
+                trapTitle: "Önemli Mesaj!", trapDesc: "Kimliğinizi doğrulayın.", trapBtn: "DOĞRULA",
+                hackTitle: "HACKLENDİ!", hackDesc: "Veri aktarılıyor...",
+                stopTitle: "DUR!", stopDesc: "Kandırılmak işte bu kadar kolay.", stopBtn: "Anladım",
+                msgBadge: "Oku!", themeLabel: "Tema"
+            },
+        
+        };
+
+        const questionsData = {
+            sv: {
+                low: [
+                    { 
+                        question: "Telefonen ringer. En person som låter stressad påstår sig ringa från 'Microsofts säkerhetsavdelning'. De säger att din dator skickar ut virus och att de måste rensa den omedelbart. Vad gör du?", 
+                        image: "orolig_samtal.png", 
+                        answers: [
+                            { text: "Jag blir orolig och gör exakt som de säger för att rädda datorn.", isCorrect: false, feedback: "Nej! Detta är en bluff. Microsoft ringer aldrig upp privatpersoner på det här sättet." }, 
+                            { text: "Jag lägger på luren direkt utan att diskutera.", isCorrect: true, feedback: "Helt rätt! Det är det enda säkra sättet att hantera dessa samtal." },
+                            { text: "Jag frågar vad personen heter för att kontrollera.", isCorrect: false, feedback: "Fel! Det spelar ingen roll, de ljuger ändå. Lägg på luren." }
+                        ] 
+                    },
+                    { 
+                        question: "Det plingar till i mobilen. Ett SMS säger: 'GRATTIS! Ditt nummer har dragits som vinnare av en ny iPhone! Klicka här för att hämta din vinst'. Du har inte varit med i någon tävling. Vad gör du?", 
+                        image: "mobiltelefon.png", 
+                        answers: [
+                            { text: "Vad kul! Jag klickar på länken för att se om det är sant.", isCorrect: false, feedback: "Stopp! Om du inte tävlat kan du inte vinna. Länken leder till virus eller abonnemangsfällor." }, 
+                            { text: "Jag raderar meddelandet direkt.", isCorrect: true, feedback: "Rätt! Det är spam och bluff." },
+                            { text: "Jag svarar 'STOPP' för att slippa fler sms.", isCorrect: false, feedback: "Fel! Svara aldrig, det bekräftar bara för bedragarna att ditt nummer är aktivt." }
+                        ] 
+                    },
+                    { 
+                        question: "Du får ett SMS från ett okänt nummer: 'Hej mamma/pappa! Jag har tappat min mobil i toaletten och detta är mitt nya nummer. Kan du swisha pengar akut så jag kan köpa en ny?'. Hur reagerar du?", 
+                        image: "hejmamma.png", 
+                        answers: [
+                            { text: "Jag swishar direkt, mitt barn behöver ju hjälp!", isCorrect: false, feedback: "Varning! Detta är ett mycket vanligt bedrägeri. Bedragaren låtsas vara ditt barn." }, 
+                            { text: "Jag provar att ringa mitt barns GAMLA nummer först för att kontrollera.", isCorrect: true, feedback: "Exakt! Dubbelkolla alltid. Ofta svarar barnet på sitt vanliga nummer och vet ingenting." },
+                            { text: "Jag frågar 'Vem är det?'.", isCorrect: false, feedback: "Fel! Inled inte en konversation, det är precis vad de vill." }
+                        ] 
+                    },
+                    { 
+                        question: "Någon ringer och påstår sig vara från din bank. De säger att någon försöker stjäla dina pengar just nu och uppmanar dig att använda din bankdosa eller BankID för att 'stoppa' överföringen. Vad gör du?", 
+                        image: "bankdosan.png", 
+                        answers: [
+                            { text: "Jag använder dosan/BankID snabbt för att skydda mina pengar.", isCorrect: false, feedback: "Nej! Banken ber dig ALDRIG logga in när de ringer dig. Du är på väg att släppa in bedragaren." }, 
+                            { text: "Jag lägger på och ringer själv upp bankens officiella nummer.", isCorrect: true, feedback: "Helt rätt. Använd bara dosan/BankID när DU själv har ringt upp banken." },
+                            { text: "Jag ber att få tala med polisen.", isCorrect: false, feedback: "Fel! Det hjälper inte, det är bättre att bara lägga på och ringa banken själv." }
+                        ] 
+                    }
+                ],
+                medium: [
+                    { 
+                        question: "Du väntar inget paket, men får ett SMS från 'PostNord' eller 'DHL': 'Ditt paket har fastnat i tullen. Klicka här och betala 29 kr i avgift för att få det levererat'. Vad gör du?", 
+                        image: "postnordfake.png", 
+                        answers: [
+                            { text: "Det är ju en liten summa, jag betalar för säkerhets skull.", isCorrect: false, feedback: "Nej! De vill komma åt dina kortuppgifter för att kunna dra stora summor senare." }, 
+                            { text: "Jag raderar SMS:et. Om jag inte beställt något är det bluff.", isCorrect: true, feedback: "Rätt! Klicka aldrig på länkar i oväntade leverans-SMS." },
+                            { text: "Jag svarar och frågar vilket paket det gäller.", isCorrect: false, feedback: "Fel! Svara aldrig på bedrägeri-SMS." }
+                        ] 
+                    },
+                    { 
+                        question: "Många använder BankID dagligen, men vad är det egentligen rent juridiskt?", 
+                        image: "bankid.jpg", 
+                        answers: [
+                            { text: "Det är bara ett smidigt sätt att logga in på Facebook och spel.", isCorrect: false, feedback: "Det är mycket mer än så." }, 
+                            { text: "Det är min digitala underskrift, lika bindande som att skriva på med penna.", isCorrect: true, feedback: "Exakt! Var lika försiktig med ditt BankID som med ditt pass eller plånbok." },
+                            { text: "Det är ett virusskydd för mobilen.", isCorrect: false, feedback: "Fel! Det är en elektronisk legitimation." }
+                        ] 
+                    },
+                    { 
+                        question: "Du har lagt ut en soffa till försäljning på Facebook Marketplace. En köpare hör av sig snabbt och vill skicka ett 'bud' (FedEx/UPS) som hämtar varan och ger dig kontanter i ett kuvert. Du behöver bara klicka på en länk för att 'bekräfta'. Vad gör du?", 
+                        image: "kurir.png", 
+                        answers: [
+                            { text: "Det låter smidigt att slippa krångel, jag klickar.", isCorrect: false, feedback: "Nej! Detta är en klassisk bedrägerimetod. Kuriren finns inte, de vill åt dina uppgifter via länken." }, 
+                            { text: "Jag avbryter kontakten. Jag säljer bara till någon som kommer personligen.", isCorrect: true, feedback: "Rätt! Riktiga köpare beter sig inte så här." },
+                            { text: "Jag ber om att få se deras ID-kort.", isCorrect: false, feedback: "Fel! Det hjälper inte, de kan enkelt skicka en falsk bild på ett ID." }
+                        ] 
+                    },
+                    { 
+                        question: "Du får en vänförfrågan på Facebook av en okänd person som ser trevlig ut. Efter några veckors chattande berättar personen att hen har hamnat i knipa utomlands och ber dig föra över pengar. Vad gör du?", 
+                        image: "facebook.png", 
+                        answers: [
+                            { text: "Jag hjälper till, vi är ju vänner nu.", isCorrect: false, feedback: "Stopp! Detta kallas romansbedrägeri. Personen är inte den hen utger sig för att vara." }, 
+                            { text: "Jag blockerar personen direkt och skickar aldrig pengar.", isCorrect: true, feedback: "Helt rätt. Bedragare bygger förtroende över tid för att lura dig." },
+                            { text: "Jag frågar hur mycket pengar som behövs.", isCorrect: false, feedback: "Fel! Då tror de att du har gått på det och kommer pressa dig hårdare." }
+                        ] 
+                    },
+                    { 
+                        question: "Du sitter på ett café eller hotell och ser ett öppet Wi-Fi nätverk som heter 'Gratis Gtäst-WiFi'. Är det säkert att logga in på din internetbank via det nätverket?", 
+                        image: "wificafe.png", 
+                        answers: [
+                            { text: "Ja, det är ju smidigt med gratis internet.", isCorrect: false, feedback: "Nej. Öppna nätverk kan avlyssnas av bedragare som sitter i närheten." }, 
+                            { text: "Nej. Jag stänger av Wi-Fi och använder mitt eget mobilnät (4G/5G) istället.", isCorrect: true, feedback: "Exakt! Ditt eget mobilnät är krypterat och mycket säkrare." },
+                            { text: "Bara om jag ska kolla saldot snabbt.", isCorrect: false, feedback: "Fel! Det räcker för att de ska kunna se din trafik." }
+                        ] 
+                    },
+                    { 
+                        question: "Är det en bra idé att ha samma lösenord (t.ex. namnet på ditt husdjur) till Facebook, din e-post och Netflix för att det är lätt att komma ihåg?", 
+                        image: "password.png", 
+                        answers: [
+                            { text: "Ja, annars glömmer jag bort dem.", isCorrect: false, feedback: "Det är farligt! Om bedragare knäcker lösenordet på en sida, kommer de in överallt." }, 
+                            { text: "Nej. Jag bör ha unika lösenord, särskilt till min e-post.", isCorrect: true, feedback: "Rätt! Byt åtminstone lösenord på din e-post så den är helt unik." },
+                            { text: "Ja, om jag skriver upp det på en lapp.", isCorrect: false, feedback: "Fel! Risken är densamma om en hemsida blir hackad." }
+                        ] 
+                    }
+                ],
+                high: [
+                    { 
+                        question: "Banken ringer upp dig och säger att ditt konto är under en pågående hackerattack. Personen låter stressad och ber dig starta BankID för att 'identifiera dig' och stoppa tjuvarna. Vad händer om du gör det?", 
+                        image: "imposter.png", 
+                        answers: [
+                            { text: "Jag stoppar tjuven och säkrar mina pengar.", isCorrect: false, feedback: "Tvärtom! Genom att använda BankID släpper du in bedragaren i din bank." }, 
+                            { text: "Jag godkänner inloggningen för bedragaren.", isCorrect: true, feedback: "Rätt. BankID används för att släppa in någon, aldrig för att stoppa någon." },
+                            { text: "Ingenting händer, det är bara en kontroll.", isCorrect: false, feedback: "Fel! Du ger dem full tillgång till ditt konto." }
+                        ] 
+                    },
+                    { 
+                        question: "Du får ett mejl som ser ut att komma från Skatteverket om att du ska få pengar tillbaka. Det finns en länk till 'Mina Sidor'. Hur vet du om det är äkta?", 
+                        image: "skatteverketmejl.png", 
+                        answers: [
+                            { text: "Det har Skatteverkets logga och ser proffsigt ut.", isCorrect: false, feedback: "Loggor är enkla att kopiera. Det betyder ingenting." }, 
+                            { text: "Jag struntar i länken, öppnar webbläsaren själv och skriver in skatteverket.se.", isCorrect: true, feedback: "Helt rätt. Gå alltid \"köksvägen\" (skriv adressen själv), klicka inte på länkar." },
+                            { text: "Jag svarar på mejlet och frågar om det stämmer.", isCorrect: false, feedback: "Fel! Då svarar bedragaren bara 'Ja, det är äkta'." }
+                        ] 
+                    },
+                    { 
+                        question: "En person från 'teknisk support' ringer och vill hjälpa dig med din långsamma dator. De ber dig ladda ner ett program som heter 'AnyDesk' eller 'TeamViewer'. Vad innebär det?", 
+                        image: "anydeskteamviewer.jpg", 
+                        answers: [
+                            { text: "Att de kan rensa datorn på distans.", isCorrect: false, feedback: "Varning! Dessa program ger dem full kontroll över din mus och tangentbord." }, 
+                            { text: "Att de tar över min dator och kan se allt jag gör, inklusive när jag loggar in på banken.", isCorrect: true, feedback: "Rätt! Ladda aldrig ner dessa program på uppmaning av någon annan." },
+                            { text: "Jag ber att få tala med en chef.", isCorrect: false, feedback: "Fel! De kopplar dig bara till en annan bedragare." }
+                        ] 
+                    },
+                    { 
+                        question: "Du ser en annons på Facebook där en kändis (t.ex. Leif GW Persson) tipsar om en fantastisk investering i Bitcoin där man kan bli rik snabbt. Vad är detta?", 
+                        image: "leif.png", 
+                        answers: [
+                            { text: "En bra chans att tjäna pengar, kändisen är ju pålitlig.", isCorrect: false, feedback: "Nej, detta är investeringsbedrägeri. Bilden är stulen och kändisen vet ingenting." }, 
+                            { text: "Det är en bluff. Om det låter för bra för att vara sant, så är det det.", isCorrect: true, feedback: "Korrekt." },
+                            { text: "Jag läser kommentarerna först.", isCorrect: false, feedback: "Fel! Kommentarerna är ofta falska och skrivna av bedragarna själva." }
+                        ] 
+                    },
+                    { 
+                        question: "Du googlar på din bank för att logga in. Längst upp i sökresultatet ser du en länk till banken, men det står en liten text 'Annons' bredvid. Är det säkert att klicka?", 
+                        image: "bankannons.png", 
+                        answers: [
+                            { text: "Ja, Google kollar alla länkar noga.", isCorrect: false, feedback: "Nej! Bedragare köper annonsplatser för att hamna högst upp med falska sidor." }, 
+                            { text: "Nej. Jag skriver in bankens adress själv i adressfältet.", isCorrect: true, feedback: "Exakt! Det är det enda sättet att vara 100% säker på att du hamnar rätt." },
+                            { text: "Jag klickar om sidan ser proffsig ut.", isCorrect: false, feedback: "Fel! De kan kopiera utseendet exakt." }
+                        ] 
+                    },
+                    { 
+                        question: "När du använder BankID står det ibland 'Jag identifierar mig' och ibland 'Jag skriver under'. Vet du skillnaden?", 
+                        image: "bankid.jpg", 
+                        answers: [
+                            { text: "Det spelar ingen roll, man slår bara sin kod.", isCorrect: false, feedback: "Det är livsviktigt! 'Skriver under' betyder att pengar flyttas eller avtal ändras." }, 
+                            { text: "'Skriver under' är juridiskt bindande och kan betyda att pengar lämnar kontot.", isCorrect: true, feedback: "Rätt! Var extra vaksam om det står 'Jag skriver under' om du inte själv startat en överföring." },
+                            { text: "Det beror på vilken bank man har.", isCorrect: false, feedback: "Fel! Det är samma regler för alla banker." }
+                        ] 
+                    }
+                ]
+            },
+         en: {
+                low: [
+                    { 
+                        question: "The phone rings. A stressed person claims to be from 'Microsoft Security'. They say your computer is sending out viruses and they must clean it immediately. What do you do?", 
+                        image: "orolig_samtal.png", 
+                        answers: [
+                            { text: "I get worried and do exactly as they say to save the computer.", isCorrect: false, feedback: "No! This is a scam. Microsoft never calls private individuals like this." }, 
+                            { text: "I hang up immediately without discussing.", isCorrect: true, feedback: "Correct! Hanging up is the only safe way to handle these calls." },
+                            { text: "I ask for the person's name.", isCorrect: false, feedback: "Wrong! It doesn't matter, they are lying anyway. Hang up." }
+                        ] 
+                    },
+                    { 
+                        question: "Your mobile beeps. An SMS says: 'CONGRATULATIONS! Your number has won a new iPhone! Click here to claim your prize'. You haven't entered any competition. What do you do?", 
+                        image: "mobiltelefon.png", 
+                        answers: [
+                            { text: "How fun! I click the link to see if it's true.", isCorrect: false, feedback: "Stop! If you haven't competed, you can't win. The link leads to viruses or subscription traps." }, 
+                            { text: "I delete the message immediately.", isCorrect: true, feedback: "Correct! It is spam and a bluff." },
+                            { text: "I reply STOP.", isCorrect: false, feedback: "Wrong! Never reply, that confirms your number is active." }
+                        ] 
+                    },
+                    { 
+                        question: "You get an SMS from an unknown number: 'Hi Mum/Dad! I dropped my phone in the toilet and this is my new number. Can you send money urgently so I can buy a new one?'. How do you react?", 
+                        image: "hejmamma.png", 
+                        answers: [
+                            { text: "I send money immediately, my child needs help!", isCorrect: false, feedback: "Warning! This is a very common scam. The fraudster is pretending to be your child." }, 
+                            { text: "I try calling my child's OLD number first to check.", isCorrect: true, feedback: "Exactly! Always double-check. Often the child answers their regular number and knows nothing." },
+                            { text: "I ask who it is.", isCorrect: false, feedback: "Wrong! That just confirms your number works." }
+                        ] 
+                    },
+                    { 
+                        question: "Someone calls claiming to be from your bank. They say someone is stealing your money right now and urge you to use your Security Token or BankID to 'stop' the transfer. What do you do?", 
+                        image: "bankdosan.png", 
+                        answers: [
+                            { text: "I use the token/BankID quickly to protect my money.", isCorrect: false, feedback: "No! The bank NEVER asks you to log in when they call you. You are about to let the scammer in." }, 
+                            { text: "I hang up and call the bank's official number myself.", isCorrect: true, feedback: "Correct. Only use your token/BankID when YOU have initiated the call to the bank." },
+                            { text: "I ask to speak to the police.", isCorrect: false, feedback: "Wrong! It is better to just hang up." }
+                        ] 
+                    }
+                ],
+                medium: [
+                    { 
+                        question: "You are not expecting a package, but get an SMS from 'PostNord' or 'DHL': 'Your package is stuck in customs. Click here and pay 29 kr in fees to have it delivered'. What do you do?", 
+                        image: "postnordfake.png", 
+                        answers: [
+                            { text: "It's a small amount, I pay just in case.", isCorrect: false, feedback: "No! They want your credit card details to steal larger amounts later." }, 
+                            { text: "I delete the SMS. If I haven't ordered anything, it's a scam.", isCorrect: true, feedback: "Correct! Never click links in unexpected delivery SMSs." },
+                            { text: "I reply and ask which package it is.", isCorrect: false, feedback: "Wrong! Never reply to scam SMS." }
+                        ] 
+                    },
+                    { 
+                        question: "Many use BankID daily, but what is it really in legal terms?", 
+                        image: "bankid.jpg", 
+                        answers: [
+                            { text: "It's just an easy way to log into Facebook and games.", isCorrect: false, feedback: "It is much more than that." }, 
+                            { text: "It is my digital signature, as binding as signing with a pen.", isCorrect: true, feedback: "Exactly! Be as careful with your BankID as with your passport or wallet." },
+                            { text: "It is a virus protection app.", isCorrect: false, feedback: "Wrong! It is an e-ID." }
+                        ] 
+                    },
+                    { 
+                        question: "You are selling a sofa on Facebook Marketplace. A buyer contacts you quickly and wants to send a 'courier' (FedEx/UPS) to pick up the item and give you cash in an envelope. You just need to click a link to 'confirm'. What do you do?", 
+                        image: "kurir.png", 
+                        answers: [
+                            { text: "Sounds convenient to avoid hassle, I click.", isCorrect: false, feedback: "No! This is a classic scam method. The courier doesn't exist; they want your details via the link." }, 
+                            { text: "I end contact. I only sell to someone who comes in person.", isCorrect: true, feedback: "Correct! Real buyers do not behave like this." },
+                            { text: "I ask for their ID card.", isCorrect: false, feedback: "Wrong! It won't help, they can send a fake picture." }
+                        ] 
+                    },
+                    { 
+                        question: "You get a friend request on Facebook from a stranger who looks nice (maybe a doctor or soldier). After a few weeks of chatting, they say they are in trouble abroad and ask you to transfer money. What do you do?", 
+                        image: "facebook.png", 
+                        answers: [
+                            { text: "I help, we are friends now.", isCorrect: false, feedback: "Stop! This is called a romance scam. The person is not who they claim to be." }, 
+                            { text: "I block the person immediately and never send money.", isCorrect: true, feedback: "Correct. Scammers build trust over time to trick you." },
+                            { text: "I ask how much they need.", isCorrect: false, feedback: "Wrong! Then they think you will fall for it." }
+                        ] 
+                    },
+                    { 
+                        question: "You are at a cafe or hotel and see an open Wi-Fi network named 'Free Guest-WiFi'. Is it safe to log into your online bank via that network?", 
+                        image: "wificafe.png", 
+                        answers: [
+                            { text: "Yes, free internet is convenient.", isCorrect: false, feedback: "No. Open networks can be eavesdropped on by scammers nearby." }, 
+                            { text: "No. I turn off Wi-Fi and use my own mobile network (4G/5G) instead.", isCorrect: true, feedback: "Exactly! Your own mobile network is encrypted and much safer." },
+                            { text: "Only if I check the balance quickly.", isCorrect: false, feedback: "Wrong! That is enough time for them to see your data." }
+                        ] 
+                    },
+                    { 
+                        question: "Is it a good idea to have the same password (e.g., your pet's name) for Facebook, your email, and Netflix because it's easy to remember?", 
+                        image: "password.png", 
+                        answers: [
+                            { text: "Yes, otherwise I forget them.", isCorrect: false, feedback: "It is dangerous! If scammers crack the password on one site, they get into everything." }, 
+                            { text: "No. I should have unique passwords, especially for my email.", isCorrect: true, feedback: "Correct! Change your email password so it is completely unique." },
+                            { text: "Yes, if I write it down.", isCorrect: false, feedback: "Wrong! It is still the same risk if a site gets hacked." }
+                        ] 
+                    }
+                ],
+                high: [
+                    { 
+                        question: "The bank calls and says your account is under an ongoing hacker attack. The person sounds stressed and asks you to start BankID to 'identify yourself' and stop the thieves. What happens if you do?", 
+                        image: "imposter.png", 
+                        answers: [
+                            { text: "I stop the thief and secure my money.", isCorrect: false, feedback: "Opposite! By using BankID, you are letting the scammer into your bank." }, 
+                            { text: "I approve the login for the scammer.", isCorrect: true, feedback: "Correct. BankID is used to let someone in, never to stop someone." },
+                            { text: "Nothing happens.", isCorrect: false, feedback: "Wrong! You give them access to your account." }
+                        ] 
+                    },
+                    { 
+                        question: "You get an email looking like it's from the Tax Agency (Skatteverket) saying you will get money back. There is a link to 'My Pages'. How do you know if it's real?", 
+                        image: "skatteverketmejl.png", 
+                        answers: [
+                            { text: "It has the official logo and looks professional.", isCorrect: false, feedback: "Logos are easy to copy. It means nothing." }, 
+                            { text: "I ignore the link, open the browser myself, and type skatteverket.se.", isCorrect: true, feedback: "Correct. Always go the 'kitchen way' (type the address yourself), do not click links." },
+                            { text: "I reply and ask if it is real.", isCorrect: false, feedback: "Wrong! Then the scammer will just say 'Yes'." }
+                        ] 
+                    },
+                    { 
+                        question: "A person from 'technical support' calls and wants to help you with your slow computer. They ask you to download a program called 'AnyDesk' or 'TeamViewer'. What does that mean?", 
+                        image: "anydeskteamviewer.jpg", 
+                        answers: [
+                            { text: "That they can clean the computer remotely.", isCorrect: false, feedback: "Warning! These programs give them full control over your mouse and keyboard." }, 
+                            { text: "That they take over my computer and can see everything I do, including when I log into the bank.", isCorrect: true, feedback: "Correct! Never download these programs on someone else's request." },
+                            { text: "I ask to speak to a manager.", isCorrect: false, feedback: "Wrong! They will just pass you to another scammer." }
+                        ] 
+                    },
+                    { 
+                        question: "You see an ad on Facebook where a celebrity recommends a fantastic investment in Bitcoin where you can get rich quick. What is this?", 
+                        image: "leif.png", 
+                        answers: [
+                            { text: "A good chance to make money, the celebrity is trustworthy.", isCorrect: false, feedback: "No, this is investment fraud. The image is stolen and the celebrity knows nothing." }, 
+                            { text: "It is a scam. If it sounds too good to be true, it is.", isCorrect: true, feedback: "Correct." },
+                            { text: "I read the comments first.", isCorrect: false, feedback: "Wrong! The comments are often written by fake accounts." }
+                        ] 
+                    },
+                    { 
+                        question: "You google your bank to log in. At the top of the search results, you see a link to the bank, but there is a small text 'Ad' next to it. Is it safe to click?", 
+                        image: "bankannons.png", 
+                        answers: [
+                            { text: "Yes, Google checks all links carefully.", isCorrect: false, feedback: "No! Scammers buy ad space to end up at the top with fake pages." }, 
+                            { text: "No. I type the bank's address myself in the address bar.", isCorrect: true, feedback: "Exactly! That is the only way to be 100% sure you land right." },
+                            { text: "I click if the page looks professional.", isCorrect: false, feedback: "Wrong! They can copy the look exactly." }
+                        ] 
+                    },
+                    { 
+                        question: "When using BankID, it sometimes says 'I identify myself' and sometimes 'I sign'. Do you know the difference?", 
+                        image: "bankid.jpg", 
+                        answers: [
+                            { text: "It doesn't matter, you just enter your code.", isCorrect: false, feedback: "It is vital! 'Sign' means money is moving or agreements are changing." }, 
+                            { text: "'Sign' is legally binding and can mean money leaves the account.", isCorrect: true, feedback: "Correct! Be extra vigilant if it says 'I sign' if you haven't initiated a transfer yourself." },
+                            { text: "It depends on which bank you have.", isCorrect: false, feedback: "Wrong! It is the same rules for everyone." }
+                        ] 
+                    }
+                ]
+            },
+            fi: {
+                low: [
+                    { 
+                        question: "Puhelin soi. Stressaantunut henkilö väittää soittavansa 'Microsoftin turvaosastolta'. Hän sanoo, että tietokoneesi lähettää viruksia ja se on puhdistettava heti. Mitä teet?", 
+                        image: "orolig_samtal.png", 
+                        answers: [
+                            { text: "Huolestun ja teen tarkalleen kuten he sanovat pelastaakseni koneen.", isCorrect: false, feedback: "Ei! Tämä on huijaus. Microsoft ei koskaan soita yksityishenkilöille tällä tavalla." }, 
+                            { text: "Lopetan puhelun välittömästi keskustelematta.", isCorrect: true, feedback: "Aivan oikein! Se on ainoa turvallinen tapa." },
+                            { text: "Kysyn henkilön nimeä.", isCorrect: false, feedback: "Väärin! Sillä ei ole väliä, he valehtelevat kuitenkin." }
+                        ] 
+                    },
+                    { 
+                        question: "Puhelin piippaa. Tekstiviestissä lukee: 'ONNEA! Numerosi on voittanut uuden iPhonen! Lunasta palkintosi klikkaamalla tästä'. Et ole osallistunut mihinkään kilpailuun. Mitä teet?", 
+                        image: "mobiltelefon.png", 
+                        answers: [
+                            { text: "Vau! Klikkaan linkkiä nähdäkseni onko se totta.", isCorrect: false, feedback: "Seis! Et voi voittaa osallistumatta. Linkki johtaa viruksiin." }, 
+                            { text: "Poistan viestin heti.", isCorrect: true, feedback: "Oikein! Se on roskapostia ja huijaus." },
+                            { text: "Vastaan 'STOP'.", isCorrect: false, feedback: "Väärin! Älä vastaa, se vahvistaa että numerosi on käytössä." }
+                        ] 
+                    },
+                    { 
+                        question: "Saat viestin tuntemattomasta numerosta: 'Hei äiti/isä! Puhelimeni putosi vessanpönttöön ja tässä on uusi numeroni. Voitko lähettää rahaa (Swish) heti, jotta saan uuden?'. Miten reagoit?", 
+                        image: "hejmamma.png", 
+                        answers: [
+                            { text: "Lähetän rahaa heti, lapseni tarvitsee apua!", isCorrect: false, feedback: "Varoitus! Tämä on yleinen huijaus. Huijari esittää lastasi." }, 
+                            { text: "Kokeilen soittaa lapseni VANHAAN numeroon ensin tarkistaakseni.", isCorrect: true, feedback: "Juuri niin! Tarkista aina ensin. Usein lapsi vastaa vanhaan numeroonsa." },
+                            { text: "Kysyn kuka siellä on.", isCorrect: false, feedback: "Väärin! Älä ryhdy keskusteluun." }
+                        ] 
+                    },
+                    { 
+                        question: "Joku soittaa ja väittää olevansa pankistasi. Hän sanoo, että joku yrittää varastaa rahasi juuri nyt ja kehottaa sinua käyttämään tunnuslukulaittetta tai BankID:tä 'pysäyttääksesi' siirron. Mitä teet?", 
+                        image: "bankdosan.png", 
+                        answers: [
+                            { text: "Käytän laitetta/BankID:tä nopeasti suojatakseni rahani.", isCorrect: false, feedback: "Ei! Pankki ei KOSKAAN pyydä kirjautumaan, kun he soittavat sinulle." }, 
+                            { text: "Lopetan puhelun ja soitan itse pankin viralliseen numeroon.", isCorrect: true, feedback: "Aivan oikein. Käytä tunnuslukuja vain kun SINÄ soitat pankkiin." },
+                            { text: "Pyydän saada puhua poliisin kanssa.", isCorrect: false, feedback: "Väärin! Poliisi ei myöskään toimi näin." }
+                        ] 
+                    }
+                ],
+                medium: [
+                    { 
+                        question: "Et odota pakettia, mutta saat viestin PostNordilta tai DHL:ltä: 'Pakettisi on juuttunut tulliin. Klikkaa tästä ja maksa 29 kr toimitusmaksu'. Mitä teet?", 
+                        image: "postnordfake.png", 
+                        answers: [
+                            { text: "Se on pieni summa, maksan varmuuden vuoksi.", isCorrect: false, feedback: "Ei! He haluavat korttitietosi varastaakseen suurempia summia myöhemmin." }, 
+                            { text: "Poistan viestin. Jos en ole tilannut mitään, se on huijaus.", isCorrect: true, feedback: "Oikein! Älä koskaan klikkaa linkkejä odottamattomissa viesteissä." },
+                            { text: "Vastaan ja kysyn mikä paketti on kyseessä.", isCorrect: false, feedback: "Väärin! Älä vastaa huijausviesteihin." }
+                        ] 
+                    },
+                    { 
+                        question: "Monet käyttävät BankID:tä päivittäin, mutta mikä se on juridisesti?", 
+                        image: "bankid.jpg", 
+                        answers: [
+                            { text: "Se on vain helppo tapa kirjautua Facebookiin.", isCorrect: false, feedback: "Se on paljon enemmän." }, 
+                            { text: "Se on digitaalinen allekirjoitukseni, yhtä sitova kuin kynällä allekirjoittaminen.", isCorrect: true, feedback: "Juuri niin! Ole yhtä varovainen sen kanssa kuin passisi." },
+                            { text: "Se on virustorjuntaohjelma.", isCorrect: false, feedback: "Väärin! Se on sähköinen henkilöllisyystodistus." }
+                        ] 
+                    },
+                    { 
+                        question: "Olet myymässä sohvaa Facebook Marketplacessa. Ostaja ottaa yhteyttä ja haluaa lähettää 'kuriirin' (FedEx/UPS) hakemaan tavaran ja tuomaan rahat kirjekuoressa. Sinun tarvitsee vain klikata linkkiä 'vahvistaaksesi'. Mitä teet?", 
+                        image: "kurir.png", 
+                        answers: [
+                            { text: "Kuulostaa kätevältä, klikkaan.", isCorrect: false, feedback: "Ei! Tämä on klassinen huijaus. Kuriiria ei ole olemassa." }, 
+                            { text: "Katkaisen yhteyden. Myyn vain henkilölle, joka tulee itse paikalle.", isCorrect: true, feedback: "Oikein! Oikeat ostajat eivät toimi näin." },
+                            { text: "Pyydän kuvaa heidän henkilökortistaan.", isCorrect: false, feedback: "Väärin! He voivat väärentää sen." }
+                        ] 
+                    },
+                    { 
+                        question: "Saat Facebookissa kaveripyynnön tuntemattomalta, joka näyttää mukavalta (ehkä lääkäri tai sotilas). Viikkojen chattailun jälkeen hän kertoo olevansa pulassa ulkomailla ja pyytää rahaa. Mitä teet?", 
+                        image: "facebook.png", 
+                        answers: [
+                            { text: "Autan, olemmehan ystäviä.", isCorrect: false, feedback: "Seis! Tämä on rakkaushuijaus. Henkilö ei ole se, kuka väittää olevansa." }, 
+                            { text: "Estän henkilön heti enkä koskaan lähetä rahaa.", isCorrect: true, feedback: "Aivan oikein. Huijarit rakentavat luottamusta huijatakseen." },
+                            { text: "Kysyn paljonko hän tarvitsee.", isCorrect: false, feedback: "Väärin! Älä lähde mukaan." }
+                        ] 
+                    },
+                    { 
+                        question: "Olet kahvilassa ja näet avoimen Wi-Fi-verkon nimeltä 'Ilmainen Vieras-WiFi'. Onko turvallista kirjautua verkkopankkiin sen kautta?", 
+                        image: "wificafe.png", 
+                        answers: [
+                            { text: "Kyllä, ilmainen netti on kätevä.", isCorrect: false, feedback: "Ei. Rikolliset voivat vakoilla avoimia verkkoja." }, 
+                            { text: "Ei. Suljen Wi-Fin ja käytän omaa mobiilidataa (4G/5G).", isCorrect: true, feedback: "Juuri niin! Oma mobiiliverkkosi on turvallisempi." },
+                            { text: "Vain jos tarkistan saldon nopeasti.", isCorrect: false, feedback: "Väärin! Se riittää tietojen varastamiseen." }
+                        ] 
+                    },
+                    { 
+                        question: "Onko hyvä idea käyttää samaa salasanaa (esim. lemmikin nimi) Facebookissa, sähköpostissa ja Netflixissä, jotta se on helppo muistaa?", 
+                        image: "password.png", 
+                        answers: [
+                            { text: "Kyllä, muuten unohdan ne.", isCorrect: false, feedback: "Se on vaarallista! Jos yksi sivu hakkeroidaan, he pääsevät kaikkeen." }, 
+                            { text: "Ei. Minulla tulisi olla eri salasanat, etenkin sähköpostille.", isCorrect: true, feedback: "Oikein! Vaihda ainakin sähköpostin salasana." },
+                            { text: "Kyllä, jos kirjoitan sen ylös.", isCorrect: false, feedback: "Väärin! Riski on sama jos tili murretaan." }
+                        ] 
+                    }
+                ],
+                high: [
+                    { 
+                        question: "Pankki soittaa ja sanoo, että tilisi on hakkerihyökkäyksen kohteena. Henkilö kuulostaa stressaantuneelta ja pyytää sinua käynnistämään BankID:n 'tunnistautuaksesi' ja pysäyttääksesi varkaat. Mitä tapahtuu jos teet niin?", 
+                        image: "imposter.png", 
+                        answers: [
+                            { text: "Pysäytän varkaan ja turvaan rahani.", isCorrect: false, feedback: "Päinvastoin! Päästät huijarin sisään pankkiisi." }, 
+                            { text: "Hyväksyn huijarin sisäänkirjautumisen.", isCorrect: true, feedback: "Oikein. BankID:tä käytetään sisäänpääsyyn, ei pysäyttämiseen." },
+                            { text: "Ei tapahdu mitään.", isCorrect: false, feedback: "Väärin! Annat heille pääsyn." }
+                        ] 
+                    },
+                    { 
+                        question: "Saat sähköpostin, joka näyttää tulevan Verovirastolta (Skatteverket), jossa sanotaan että saat rahaa takaisin. Siinä on linkki 'Omille sivuille'. Mistä tiedät onko se aito?", 
+                        image: "skatteverketmejl.png", 
+                        answers: [
+                            { text: "Siinä on virallinen logo ja se näyttää ammattimaiselta.", isCorrect: false, feedback: "Logot on helppo kopioida. Se ei tarkoita mitään." }, 
+                            { text: "Jätän linkin huomiotta, avaan selaimen itse ja kirjoitan skatteverket.se.", isCorrect: true, feedback: "Aivan oikein. Mene aina 'keittiön kautta' (kirjoita osoite itse)." },
+                            { text: "Vastaan ja kysyn onko se aito.", isCorrect: false, feedback: "Väärin! Huijari vastaa vain 'Kyllä'." }
+                        ] 
+                    },
+                    { 
+                        question: "'Tekninen tuki' soittaa ja haluaa auttaa hitaan tietokoneesi kanssa. He pyytävät lataamaan ohjelman nimeltä 'AnyDesk' tai 'TeamViewer'. Mitä se tarkoittaa?", 
+                        image: "anydeskteamviewer.jpg", 
+                        answers: [
+                            { text: "Että he voivat puhdistaa koneen etänä.", isCorrect: false, feedback: "Varoitus! Nämä ohjelmat antavat heille täyden hallinnan koneeseesi." }, 
+                            { text: "Että he kaappaavat koneeni ja näkevät kaiken mitä teen, myös pankkikirjautumisen.", isCorrect: true, feedback: "Oikein! Älä koskaan lataa näitä pyynnöstä." },
+                            { text: "Pyydän saada puhua esihenkilölle.", isCorrect: false, feedback: "Väärin! He yhdistävät toiselle huijarille." }
+                        ] 
+                    },
+                    { 
+                        question: "Näet Facebookissa mainoksen, jossa julkkis suosittelee sijoittamaan Bitcoiniin ja rikastumaan nopeasti. Mikä tämä on?", 
+                        image: "leif.png", 
+                        answers: [
+                            { text: "Hyvä mahdollisuus tienata, julkkis on luotettava.", isCorrect: false, feedback: "Ei, tämä on sijoitushuijaus. Kuva on varastettu." }, 
+                            { text: "Se on huijaus. Jos se kuulostaa liian hyvältä ollakseen totta, se on sitä.", isCorrect: true, feedback: "Oikein." },
+                            { text: "Luen kommentit ensin.", isCorrect: false, feedback: "Väärin! Kommentit ovat väärennettyjä." }
+                        ] 
+                    },
+                    { 
+                        question: "Googlaat pankkisi. Tulosten kärjessä näet linkin pankkiin, mutta sen vieressä lukee pienellä 'Mainos'. Onko turvallista klikata?", 
+                        image: "bankannons.png", 
+                        answers: [
+                            { text: "Kyllä, Google tarkistaa kaikki linkit.", isCorrect: false, feedback: "Ei! Huijarit ostavat mainostilaa päästäkseen kärkeen valesivuilla." }, 
+                            { text: "Ei. Kirjoitan pankin osoitteen itse osoiteriville.", isCorrect: true, feedback: "Juuri niin! Se on ainoa tapa olla 100% varma." },
+                            { text: "Klikkaan jos sivu näyttää aidolta.", isCorrect: false, feedback: "Väärin! He osaavat kopioida ulkonäön täydellisesti." }
+                        ] 
+                    },
+                    { 
+                        question: "Kun käytät BankID:tä, joskus lukee 'Jag identifierar mig' (Tunnistaudun) ja joskus 'Jag skriver under' (Allekirjoitan). Tiedätkö eron?", 
+                        image: "bankid.jpg", 
+                        answers: [
+                            { text: "Sillä ei ole väliä, näppäilen vain koodin.", isCorrect: false, feedback: "Se on elintärkeää! 'Allekirjoitan' tarkoittaa rahan siirtoa tai sopimusta." }, 
+                            { text: "'Allekirjoitan' on sitova ja voi tarkoittaa rahan lähtemistä tililtä.", isCorrect: true, feedback: "Oikein! Ole erityisen valppaana jos tekstissä lukee 'skriver under'." },
+                            { text: "Se riippuu pankista.", isCorrect: false, feedback: "Väärin! Säännöt ovat samat kaikille." }
+                        ] 
+                    }
+                ]
+            },
+            es: {
+                low: [
+                    { 
+                        question: "Suena el teléfono. Una persona estresada dice llamar de 'Seguridad de Microsoft'. Dicen que tu ordenador está enviando virus y deben limpiarlo inmediatamente. ¿Qué haces?", 
+                        image: "orolig_samtal.png", 
+                        answers: [
+                            { text: "Me preocupo y hago exactamente lo que dicen para salvar el ordenador.", isCorrect: false, feedback: "¡No! Es una estafa. Microsoft nunca llama a particulares de esta manera." }, 
+                            { text: "Cuelgo inmediatamente sin discutir.", isCorrect: true, feedback: "¡Correcto! Colgar es la única forma segura de manejar estas llamadas." },
+                            { text: "Le pregunto su nombre.", isCorrect: false, feedback: "¡Mal! No importa, están mintiendo. Cuelga." }
+                        ] 
+                    },
+                    { 
+                        question: "Tu móvil suena. Un SMS dice: '¡FELICIDADES! ¡Tu número ha ganado un iPhone nuevo! Haz clic aquí para reclamar tu premio'. No has participado en ningún concurso. ¿Qué haces?", 
+                        image: "mobiltelefon.png", 
+                        answers: [
+                            { text: "¡Qué bien! Hago clic en el enlace para ver si es verdad.", isCorrect: false, feedback: "¡Alto! Si no has participado, no puedes ganar. El enlace lleva a virus o suscripciones falsas." }, 
+                            { text: "Borro el mensaje inmediatamente.", isCorrect: true, feedback: "¡Correcto! Es spam y una estafa." },
+                            { text: "Respondo STOP.", isCorrect: false, feedback: "¡Mal! Nunca respondas, eso confirma que tu número está activo." }
+                        ] 
+                    },
+                    { 
+                        question: "Recibes un SMS de un número desconocido: '¡Hola mamá/papá! Se me ha caído el móvil al váter y este es mi número nuevo. ¿Puedes enviarme dinero urgente para comprar uno nuevo?'. ¿Cómo reaccionas?", 
+                        image: "hejmamma.png", 
+                        answers: [
+                            { text: "Envío dinero inmediatamente, ¡mi hijo necesita ayuda!", isCorrect: false, feedback: "¡Aviso! Es una estafa muy común. El estafador finge ser tu hijo." }, 
+                            { text: "Intento llamar al número ANTIGUO de mi hijo primero para comprobarlo.", isCorrect: true, feedback: "¡Exacto! Comprueba siempre. A menudo el hijo responde en su número habitual y no sabe nada." },
+                            { text: "Pregunto quién es.", isCorrect: false, feedback: "¡Mal! Eso solo confirma que tu número funciona." }
+                        ] 
+                    },
+                    { 
+                        question: "Alguien llama diciendo ser de tu banco. Dicen que alguien está robando tu dinero ahora mismo y te piden usar tu token de seguridad o BankID para 'detener' la transferencia. ¿Qué haces?", 
+                        image: "bankdosan.png", 
+                        answers: [
+                            { text: "Uso el token/BankID rápidamente para proteger mi dinero.", isCorrect: false, feedback: "¡No! El banco NUNCA te pide identificarte cuando te llaman ellos. Estás a punto de dejar entrar al estafador." }, 
+                            { text: "Cuelgo y llamo yo mismo al número oficial del banco.", isCorrect: true, feedback: "Correcto. Solo usa tu token/BankID cuando TÚ has iniciado la llamada al banco." },
+                            { text: "Pido hablar con la policía.", isCorrect: false, feedback: "¡Mal! Es mejor colgar simplemente." }
+                        ] 
+                    }
+                ],
+                medium: [
+                    { 
+                        question: "No esperas ningún paquete, pero recibes un SMS de 'PostNord' o 'DHL': 'Tu paquete está retenido en aduanas. Haz clic aquí y paga 29 kr de tasas para recibirlo'. ¿Qué haces?", 
+                        image: "postnordfake.png", 
+                        answers: [
+                            { text: "Es una cantidad pequeña, pago por si acaso.", isCorrect: false, feedback: "¡No! Quieren los datos de tu tarjeta para robar grandes cantidades después." }, 
+                            { text: "Borro el SMS. Si no he pedido nada, es una estafa.", isCorrect: true, feedback: "¡Correcto! Nunca hagas clic en enlaces de SMS de entrega inesperados." },
+                            { text: "Respondo y pregunto qué paquete es.", isCorrect: false, feedback: "¡Mal! Nunca respondas a SMS de estafa." }
+                        ] 
+                    },
+                    { 
+                        question: "Muchos usan BankID a diario, pero ¿qué es realmente en términos legales?", 
+                        image: "bankid.jpg", 
+                        answers: [
+                            { text: "Es solo una forma fácil de entrar a Facebook y juegos.", isCorrect: false, feedback: "Es mucho más que eso." }, 
+                            { text: "Es mi firma digital, tan vinculante como firmar con bolígrafo.", isCorrect: true, feedback: "¡Exacto! Ten el mismo cuidado con tu BankID que con tu pasaporte o cartera." },
+                            { text: "Es una protección antivirus.", isCorrect: false, feedback: "¡Mal! Es una identificación electrónica." }
+                        ] 
+                    },
+                    { 
+                        question: "Vendes un sofá en Facebook Marketplace. Un comprador contacta rápido y quiere enviar un 'mensajero' (FedEx/UPS) para recogerlo y darte dinero en un sobre. Solo tienes que hacer clic en un enlace para 'confirmar'. ¿Qué haces?", 
+                        image: "kurir.png", 
+                        answers: [
+                            { text: "Suena cómodo para evitar líos, hago clic.", isCorrect: false, feedback: "¡No! Es una estafa clásica. El mensajero no existe; quieren tus datos a través del enlace." }, 
+                            { text: "Corto el contacto. Solo vendo a quien venga en persona.", isCorrect: true, feedback: "¡Correcto! Los compradores reales no actúan así." },
+                            { text: "Le pido su DNI.", isCorrect: false, feedback: "¡Mal! No ayuda, pueden enviar una foto falsa." }
+                        ] 
+                    },
+                    { 
+                        question: "Recibes una solicitud de amistad en Facebook de un desconocido que parece agradable (quizás médico o militar). Tras semanas chateando, dice estar en problemas en el extranjero y te pide dinero. ¿Qué haces?", 
+                        image: "facebook.png", 
+                        answers: [
+                            { text: "Ayudo, ahora somos amigos.", isCorrect: false, feedback: "¡Alto! Esto es una estafa romántica. La persona no es quien dice ser." }, 
+                            { text: "Bloqueo a la persona inmediatamente y nunca envío dinero.", isCorrect: true, feedback: "Correcto. Los estafadores construyen confianza con el tiempo para engañarte." },
+                            { text: "Pregunto cuánto necesita.", isCorrect: false, feedback: "¡Mal! Entonces creerán que caerás." }
+                        ] 
+                    },
+                    { 
+                        question: "Estás en una cafetería u hotel y ves una red Wi-Fi abierta llamada 'WiFi-Invitados-Gratis'. ¿Es seguro entrar a tu banco online por esa red?", 
+                        image: "wificafe.png", 
+                        answers: [
+                            { text: "Sí, el internet gratis es cómodo.", isCorrect: false, feedback: "No. Las redes abiertas pueden ser espiadas por estafadores cercanos." }, 
+                            { text: "No. Apago el Wi-Fi y uso mis propios datos móviles (4G/5G).", isCorrect: true, feedback: "¡Exacto! Tu propia red móvil está encriptada y es mucho más segura." },
+                            { text: "Solo si miro el saldo rápido.", isCorrect: false, feedback: "¡Mal! Es suficiente para que vean tus datos." }
+                        ] 
+                    },
+                    { 
+                        question: "¿Es buena idea tener la misma contraseña (ej. nombre de tu mascota) para Facebook, tu correo y Netflix porque es fácil de recordar?", 
+                        image: "password.png", 
+                        answers: [
+                            { text: "Sí, si no las olvido.", isCorrect: false, feedback: "¡Es peligroso! Si hackean la contraseña en un sitio, entran en todos." }, 
+                            { text: "No. Debo tener contraseñas únicas, especialmente para mi correo.", isCorrect: true, feedback: "¡Correcto! Cambia al menos la contraseña de tu correo para que sea única." },
+                            { text: "Sí, si la apunto.", isCorrect: false, feedback: "¡Mal! Sigue siendo el mismo riesgo si hackean un sitio." }
+                        ] 
+                    }
+                ],
+                high: [
+                    { 
+                        question: "El banco te llama y dice que tu cuenta está bajo un ataque hacker. La persona suena estresada y te pide iniciar BankID para 'identificarte' y detener a los ladrones. ¿Qué pasa si lo haces?", 
+                        image: "imposter.png", 
+                        answers: [
+                            { text: "Detengo al ladrón y aseguro mi dinero.", isCorrect: false, feedback: "¡Al contrario! Al usar BankID, estás dejando entrar al estafador a tu banco." }, 
+                            { text: "Apruebo el inicio de sesión del estafador.", isCorrect: true, feedback: "Correcto. BankID se usa para dejar entrar a alguien, nunca para detener a alguien." },
+                            { text: "No pasa nada.", isCorrect: false, feedback: "¡Mal! Les das acceso a tu cuenta." }
+                        ] 
+                    },
+                    { 
+                        question: "Recibes un correo que parece de la Agencia Tributaria (Skatteverket) diciendo que te devolverán dinero. Hay un enlace a 'Mis Páginas'. ¿Cómo sabes si es real?", 
+                        image: "skatteverketmejl.png", 
+                        answers: [
+                            { text: "Tiene el logo oficial y parece profesional.", isCorrect: false, feedback: "Los logos son fáciles de copiar. No significa nada." }, 
+                            { text: "Ignoro el enlace, abro el navegador yo mismo y escribo skatteverket.se.", isCorrect: true, feedback: "Totalmente correcto. Ve siempre por el 'camino seguro' (escribe la dirección tú mismo), no hagas clic en enlaces." },
+                            { text: "Respondo y pregunto si es real.", isCorrect: false, feedback: "¡Mal! El estafador solo dirá 'Sí'." }
+                        ] 
+                    },
+                    { 
+                        question: "Alguien de 'soporte técnico' llama y quiere ayudarte con tu ordenador lento. Te piden descargar un programa llamado 'AnyDesk' o 'TeamViewer'. ¿Qué significa eso?", 
+                        image: "anydeskteamviewer.jpg", 
+                        answers: [
+                            { text: "Que pueden limpiar el ordenador a distancia.", isCorrect: false, feedback: "¡Aviso! Estos programas les dan control total sobre tu ratón y teclado." }, 
+                            { text: "Que toman control de mi ordenador y pueden ver todo lo que hago, incluido cuando entro al banco.", isCorrect: true, feedback: "¡Correcto! Nunca descargues estos programas porque alguien te lo pida." },
+                            { text: "Pido hablar con un jefe.", isCorrect: false, feedback: "¡Mal! Te pasarán con otro estafador." }
+                        ] 
+                    },
+                    { 
+                        question: "Ves un anuncio en Facebook donde un famoso recomienda una inversión fantástica en Bitcoin para hacerse rico rápido. ¿Qué es esto?", 
+                        image: "leif.png", 
+                        answers: [
+                            { text: "Una buena oportunidad, el famoso es de fiar.", isCorrect: false, feedback: "No, es una estafa de inversión. La imagen es robada y el famoso no sabe nada." }, 
+                            { text: "Es una estafa. Si suena demasiado bueno para ser verdad, lo es.", isCorrect: true, feedback: "Correcto." },
+                            { text: "Leo los comentarios primero.", isCorrect: false, feedback: "¡Mal! Los comentarios suelen estar escritos por cuentas falsas." }
+                        ] 
+                    },
+                    { 
+                        question: "Buscas tu banco en Google para entrar. Arriba del todo ves un enlace al banco, pero pone un pequeño texto 'Anuncio' al lado. ¿Es seguro hacer clic?", 
+                        image: "bankannons.png", 
+                        answers: [
+                            { text: "Sí, Google revisa todos los enlaces bien.", isCorrect: false, feedback: "¡No! Los estafadores compran espacios publicitarios para salir arriba con páginas falsas." }, 
+                            { text: "No. Escribo la dirección del banco yo mismo en la barra de direcciones.", isCorrect: true, feedback: "¡Exacto! Es la única forma de estar 100% seguro de llegar al sitio correcto." },
+                            { text: "Hago clic si la página parece profesional.", isCorrect: false, feedback: "¡Mal! Pueden copiar el diseño exactamente." }
+                        ] 
+                    },
+                    { 
+                        question: "Al usar BankID, a veces dice 'Me identifico' (Jag identifierar mig) y a veces 'Firmo' (Jag skriver under). ¿Sabes la diferencia?", 
+                        image: "bankid.jpg", 
+                        answers: [
+                            { text: "No importa, solo pones tu código.", isCorrect: false, feedback: "¡Es vital! 'Firmo' significa que se mueve dinero o se cambian acuerdos." }, 
+                            { text: "'Firmo' es legalmente vinculante y puede significar que el dinero sale de la cuenta.", isCorrect: true, feedback: "¡Correcto! Ten mucho cuidado si dice 'Firmo' y tú no has iniciado una transferencia." },
+                            { text: "Depende de qué banco tengas.", isCorrect: false, feedback: "¡Mal! Son las mismas reglas para todos." }
+                        ] 
+                    }
+                ]
+            },
+           ar: {
+                low: [
+                    { 
+                        question: "يرن الهاتف. شخص يبدو متوتراً يدعي أنه من 'قسم أمان مايكروسوفت'. يقول إن جهاز الكمبيوتر الخاص بك يرسل فيروسات ويجب تنظيفه فوراً. ماذا تفعل؟", 
+                        image: "orolig_samtal.png", 
+                        answers: [
+                            { text: "أشعر بالقلق وأفعل بالضبط ما يقولونه لإنقاذ الكمبيوتر.", isCorrect: false, feedback: "لا! هذا احتيال. مايكروسوفت لا تتصل بالأفراد بهذه الطريقة أبداً." }, 
+                            { text: "أغلق الخط فوراً دون مناقشة.", isCorrect: true, feedback: "صحيح تماماً! هذا هو الطريق الآمن الوحيد للتعامل مع هذه المكالمات." },
+                            { text: "أسأل الشخص عن اسمه.", isCorrect: false, feedback: "خطأ! لا يهم، فهم يكذبون على أي حال. أغلق الخط." }
+                        ] 
+                    },
+                    { 
+                        question: "تصلك رسالة نصية تقول: 'مبروك! لقد فاز رقمك بجهاز iPhone جديد! اضغط هنا لاستلام جائزتك'. أنت لم تشارك في أي مسابقة. ماذا تفعل؟", 
+                        image: "mobiltelefon.png", 
+                        answers: [
+                            { text: "يا له من أمر ممتع! أضغط على الرابط لأرى إن كان حقيقياً.", isCorrect: false, feedback: "توقف! إذا لم تشارك فلن تفوز. الرابط يؤدي إلى فيروسات أو اشتراكات وهمية." }, 
+                            { text: "أحذف الرسالة فوراً.", isCorrect: true, feedback: "صحيح! إنها رسالة عشوائية واحتيال." },
+                            { text: "أرد بكلمة STOP.", isCorrect: false, feedback: "خطأ! لا ترد أبداً، فهذا يؤكد أن رقمك نشط." }
+                        ] 
+                    },
+                    { 
+                        question: "تتلقى رسالة من رقم مجهول: 'مرحباً أمي/أبي! لقد سقط هاتفي في المرحاض وهذا هو رقمي الجديد. هل يمكنك إرسال المال (Swish) بشكل عاجل لشراء هاتف جديد؟'. كيف تتصرف؟", 
+                        image: "hejmamma.png", 
+                        answers: [
+                            { text: "أرسل المال فوراً، ابني يحتاج للمساعدة!", isCorrect: false, feedback: "تحذير! هذا احتيال شائع جداً. المحتال يتظاهر بأنه ابنك." }, 
+                            { text: "أحاول الاتصال برقم ابني القديم أولاً للتحقق.", isCorrect: true, feedback: "بالضبط! تحقق دائماً. غالباً ما يجيب الابن على رقمه المعتاد ولا يعلم شيئاً." },
+                            { text: "أسأل 'من أنت؟'", isCorrect: false, feedback: "خطأ! هذا يؤكد فقط أن رقمك يعمل." }
+                        ] 
+                    },
+                    { 
+                        question: "يتصل شخص ويدعي أنه من البنك الذي تتعامل معه. يقول إن شخصاً ما يحاول سرقة أموالك الآن ويطلب منك استخدام جهاز الرموز أو BankID 'لإيقاف' التحويل. ماذا تفعل؟", 
+                        image: "bankdosan.png", 
+                        answers: [
+                            { text: "أستخدم الجهاز/BankID بسرعة لحماية أموالي.", isCorrect: false, feedback: "لا! البنك لا يطلب منك أبداً تسجيل الدخول عندما يتصلون بك. أنت على وشك السماح للمحتال بالدخول." }, 
+                            { text: "أغلق الخط وأتصل بالرقم الرسمي للبنك بنفسي.", isCorrect: true, feedback: "صحيح. استخدم BankID فقط عندما تكون أنت من اتصل بالبنك." },
+                            { text: "أطلب التحدث إلى الشرطة.", isCorrect: false, feedback: "خطأ! من الأفضل إغلاق الخط فقط." }
+                        ] 
+                    }
+                ],
+                medium: [
+                    { 
+                        question: "أنت لا تنتظر طرداً، لكنك تتلقى رسالة من البريد: 'طردك عالق في الجمارك. اضغط هنا وادفع 29 كرونة رسوم لتوصيله'. ماذا تفعل؟", 
+                        image: "postnordfake.png", 
+                        answers: [
+                            { text: "إنه مبلغ صغير، سأدفعه للاحتياط.", isCorrect: false, feedback: "لا! يريدون تفاصيل بطاقتك لسرقة مبالغ أكبر لاحقاً." }, 
+                            { text: "أحذف الرسالة. إذا لم أطلب شيئاً فهو احتيال.", isCorrect: true, feedback: "صحيح! لا تضغط أبداً على الروابط في رسائل التوصيل غير المتوقعة." },
+                            { text: "أرد وأسأل عن أي طرد يقصدون.", isCorrect: false, feedback: "خطأ! لا ترد أبداً على رسائل الاحتيال." }
+                        ] 
+                    },
+                    { 
+                        question: "يستخدم الكثيرون BankID يومياً، ولكن ما هو في الواقع من الناحية القانونية؟", 
+                        image: "bankid.jpg", 
+                        answers: [
+                            { text: "مجرد طريقة سهلة لتسجيل الدخول إلى فيسبوك والألعاب.", isCorrect: false, feedback: "إنه أكثر من ذلك بكثير." }, 
+                            { text: "إنه توقيعي الرقمي، ملزم قانونياً مثل التوقيع بالقلم.", isCorrect: true, feedback: "بالضبط! كن حذراً مع BankID كما هو الحال مع جواز سفرك أو محفظتك." },
+                            { text: "إنه تطبيق للحماية من الفيروسات.", isCorrect: false, feedback: "خطأ! إنه هوية إلكترونية." }
+                        ] 
+                    },
+                    { 
+                        question: "أنت تبيع أريكة على فيسبوك. يتصل مشترٍ بسرعة ويريد إرسال 'ساعي' (FedEx/UPS) لاستلام البضاعة وإعطائك النقود في مظروف. تحتاج فقط للضغط على رابط 'للتأكيد'. ماذا تفعل؟", 
+                        image: "kurir.png", 
+                        answers: [
+                            { text: "يبدو مريحاً لتجنب المتاعب، سأضغط.", isCorrect: false, feedback: "لا! هذه طريقة احتيال كلاسيكية. الساعي غير موجود؛ يريدون بياناتك عبر الرابط." }, 
+                            { text: "أقطع الاتصال. أبيع فقط لمن يأتي شخصياً.", isCorrect: true, feedback: "صحيح! المشترون الحقيقيون لا يتصرفون هكذا." },
+                            { text: "أطلب صورة هويته.", isCorrect: false, feedback: "خطأ! لن يفيد، يمكنهم إرسال صورة مزيفة." }
+                        ] 
+                    },
+                    { 
+                        question: "تتلقى طلب صداقة على فيسبوك من شخص غريب يبدو لطيفاً (ربما طبيب أو عسكري). بعد أسابيع من الدردشة، يخبرك أنه في ورطة في الخارج ويطلب منك تحويل المال. ماذا تفعل؟", 
+                        image: "facebook.png", 
+                        answers: [
+                            { text: "أساعده، نحن أصدقاء الآن.", isCorrect: false, feedback: "توقف! هذا يسمى احتيال عاطفي. الشخص ليس كما يدعي." }, 
+                            { text: "أحظر الشخص فوراً ولا أرسل المال أبداً.", isCorrect: true, feedback: "صحيح تماماً. المحتالون يبنون الثقة بمرور الوقت لخداعك." },
+                            { text: "أسأل كم يحتاج.", isCorrect: false, feedback: "خطأ! عندها سيعتقدون أنك ستقع في الفخ." }
+                        ] 
+                    },
+                    { 
+                        question: "أنت في مقهى أو فندق وترى شبكة واي فاي مفتوحة باسم 'Free Guest-WiFi'. هل من الآمن تسجيل الدخول إلى البنك عبر تلك الشبكة؟", 
+                        image: "wificafe.png", 
+                        answers: [
+                            { text: "نعم، الإنترنت المجاني مريح.", isCorrect: false, feedback: "لا. الشبكات المفتوحة يمكن مراقبتها من قبل المحتالين القريبين." }, 
+                            { text: "لا. أغلق الواي فاي وأستخدم شبكة هاتفي (4G/5G).", isCorrect: true, feedback: "بالضبط! شبكة هاتفك الخاصة مشفرة وأكثر أماناً بكثير." },
+                            { text: "فقط إذا كنت أريد التحقق من الرصيد بسرعة.", isCorrect: false, feedback: "خطأ! هذا وقت كافٍ لسرقة بياناتك." }
+                        ] 
+                    },
+                    { 
+                        question: "هل هي فكرة جيدة أن تستخدم نفس كلمة المرور (مثل اسم حيوانك الأليف) لفيسبوك وبريدك الإلكتروني ونيتفليكس لأنها سهلة التذكر؟", 
+                        image: "password.png", 
+                        answers: [
+                            { text: "نعم، وإلا سأنساها.", isCorrect: false, feedback: "هذا خطير! إذا اخترق المحتالون كلمة المرور في موقع واحد، سيدخلون لكل شيء." }, 
+                            { text: "لا. يجب أن يكون لدي كلمات مرور فريدة، خاصة لبريدي الإلكتروني.", isCorrect: true, feedback: "صحيح! قم بتغيير كلمة مرور بريدك الإلكتروني لتكون فريدة تماماً." },
+                            { text: "نعم، إذا كتبتها في ورقة.", isCorrect: false, feedback: "خطأ! الخطر لا يزال موجوداً إذا تم اختراق الموقع." }
+                        ] 
+                    }
+                ],
+                high: [
+                    { 
+                        question: "يتصل البنك ويقول إن حسابك يتعرض لهجوم قراصنة حالياً. يبدو الشخص متوتراً ويطلب منك تشغيل BankID 'لإثبات هويتك' وإيقاف اللصوص. ماذا يحدث إذا فعلت ذلك؟", 
+                        image: "imposter.png", 
+                        answers: [
+                            { text: "أوقف اللص وأؤمن أموالي.", isCorrect: false, feedback: "العكس تماماً! باستخدام BankID، أنت تسمح للمحتال بالدخول إلى بنكك." }, 
+                            { text: "أنا أوافق على تسجيل دخول المحتال.", isCorrect: true, feedback: "صحيح. يستخدم BankID للسماح بالدخول، وليس للإيقاف أبداً." },
+                            { text: "لا شيء يحدث.", isCorrect: false, feedback: "خطأ! أنت تمنحهم الوصول لحسابك." }
+                        ] 
+                    },
+                    { 
+                        question: "تتلقى بريداً إلكترونياً يبدو أنه من مصلحة الضرائب (Skatteverket) يفيد بأنك ستسترد أموالاً. يوجد رابط لـ 'صفحاتي'. كيف تعرف ما إذا كان حقيقياً؟", 
+                        image: "skatteverketmejl.png", 
+                        answers: [
+                            { text: "يحتوي على الشعار الرسمي ويبدو احترافياً.", isCorrect: false, feedback: "الشعارات سهلة النسخ. هذا لا يعني شيئاً." }, 
+                            { text: "أتجاهل الرابط، أفتح المتصفح بنفسي وأكتب skatteverket.se.", isCorrect: true, feedback: "صحيح تماماً. اذهب دائماً عبر 'الطريق الآمن' (اكتب العنوان بنفسك)، لا تضغط على الروابط." },
+                            { text: "أرد وأسأل عما إذا كان حقيقياً.", isCorrect: false, feedback: "خطأ! عندها سيجيب المحتال بـ 'نعم' فقط." }
+                        ] 
+                    },
+                    { 
+                        question: "يتصل شخص من 'الدعم الفني' ويريد مساعدتك في جهاز الكمبيوتر البطيء. يطلبون منك تحميل برنامج يسمى 'AnyDesk' أو 'TeamViewer'. ماذا يعني ذلك؟", 
+                        image: "anydeskteamviewer.jpg", 
+                        answers: [
+                            { text: "أنهم يستطيعون تنظيف الكمبيوتر عن بعد.", isCorrect: false, feedback: "تحذير! هذه البرامج تمنحهم تحكماً كاملاً في الفأرة ولوحة المفاتيح." }, 
+                            { text: "أنهم يسيطرون على جهاز الكمبيوتر ويرون كل ما أفعله، بما في ذلك تسجيل دخولي للبنك.", isCorrect: true, feedback: "صحيح! لا تقم بتحميل هذه البرامج أبداً بطلب من شخص آخر." },
+                            { text: "أطلب التحدث إلى المدير.", isCorrect: false, feedback: "خطأ! سيحولونك فقط إلى محتال آخر." }
+                        ] 
+                    },
+                    { 
+                        question: "ترى إعلاناً على فيسبوك حيث ينصح أحد المشاهير (مثل Leif GW Persson) باستثمار رائع في البيتكوين حيث يمكنك الثراء بسرعة. ما هذا؟", 
+                        image: "leif.png", 
+                        answers: [
+                            { text: "فرصة جيدة لكسب المال، المشهور موثوق به.", isCorrect: false, feedback: "لا، هذا احتيال استثماري. الصورة مسروقة والمشهور لا يعلم شيئاً." }, 
+                            { text: "إنه احتيال. إذا كان الأمر يبدو جيداً لدرجة يصعب تصديقها، فهو كذلك.", isCorrect: true, feedback: "صحيح." },
+                            { text: "أقرأ التعليقات أولاً.", isCorrect: false, feedback: "خطأ! التعليقات غالباً ما تكون مكتوبة من حسابات وهمية." }
+                        ] 
+                    },
+                    { 
+                        question: "تبحث في جوجل عن البنك لتسجيل الدخول. في أعلى نتائج البحث ترى رابطاً للبنك، ولكن بجانبه نص صغير 'إعلان' (Annons). هل من الآمن الضغط عليه؟", 
+                        image: "bankannons.png", 
+                        answers: [
+                            { text: "نعم، جوجل تفحص جميع الروابط بعناية.", isCorrect: false, feedback: "لا! المحتالون يشترون مساحات إعلانية للظهور في الأعلى بصفحات مزيفة." }, 
+                            { text: "لا. أكتب عنوان البنك بنفسي في شريط العنوان.", isCorrect: true, feedback: "بالضبط! هذه هي الطريقة الوحيدة لتكون متأكداً 100% أنك في المكان الصحيح." },
+                            { text: "أضغط إذا كانت الصفحة تبدو احترافية.", isCorrect: false, feedback: "خطأ! يمكنهم نسخ المظهر بدقة." }
+                        ] 
+                    },
+                    { 
+                        question: "عند استخدام BankID، يظهر أحياناً 'أنا أعرف نفسي' (Jag identifierar mig) وأحياناً 'أنا أوقع' (Jag skriver under). هل تعرف الفرق؟", 
+                        image: "bankid.jpg", 
+                        answers: [
+                            { text: "لا يهم، فقط أكتب الرمز.", isCorrect: false, feedback: "إنه أمر حيوي! 'أوقع' يعني نقل الأموال أو تغيير الاتفاقيات." }, 
+                            { text: "'أوقع' ملزم قانونياً وقد يعني خروج المال من الحساب.", isCorrect: true, feedback: "صحيح! كن حذراً جداً إذا كان مكتوباً 'أوقع' وأنت لم تبدأ تحويلاً بنفسك." },
+                            { text: "يعتمد ذلك على البنك.", isCorrect: false, feedback: "خطأ! القواعد نفسها للجميع." }
+                        ] 
+                    }
+                ]
+            },
+         tr: {
+                low: [
+                    { 
+                        question: "'Microsoft'tan bir kişi arıyor ve telefonuna/bilgisayarına virüs bulaştığını söylüyor. Ne yaparsın?", 
+                        image: "orolig_samtal.png", 
+                        answers: [
+                            { text: "Dediklerini yaparım", isCorrect: false, feedback: "Hayır! Microsoft müşterilerini asla böyle aramaz." }, 
+                            { text: "Telefonu kapatırım", isCorrect: true, feedback: "Doğru! Telefonu yüzüne kapat." },
+                            { text: "Adını sorarım", isCorrect: false, feedback: "Yanlış! Önemli değil, zaten yalan söylüyorlar." }
+                        ] 
+                    },
+                    { 
+                        question: "Bir SMS alıyorsun: 'Tebrikler, lotoyu kazandın!'. Ne yaparsın?", 
+                        image: "mobiltelefon.png", 
+                        answers: [
+                            { text: "Tıklarım!", isCorrect: false, feedback: "Bu bir tuzak/dolandırıcılık." }, 
+                            { text: "Silerim", isCorrect: true, feedback: "Doğru! Yarışmaya katılmadan kazanamazsın." },
+                            { text: "'DUR' diye cevaplarım", isCorrect: false, feedback: "Yanlış! Asla cevap verme, bu numaranın aktif olduğunu doğrular." }
+                        ] 
+                    },
+                    { 
+                        question: "Bilinmeyen bir numaradan SMS alıyorsun: 'Merhaba anne, yeni telefon, lütfen bana biraz para gönderir misin (Swish)?'. Ne yaparsın?", 
+                        image: "hejmamma.png", 
+                        answers: [
+                            { text: "Para gönderirim", isCorrect: false, feedback: "Dolandırıcılık! Kontrol etmek için eski numarayı ara." }, 
+                            { text: "Çocuğu ararım", isCorrect: true, feedback: "Doğru! Her zaman önce doğrula." },
+                            { text: "'Kimsin?' diye sorarım", isCorrect: false, feedback: "Yanlış! İletişime geçme." }
+                        ] 
+                    },
+                    { 
+                        question: "Biri bankadan aradığını iddia edip banka güvenlik cihazını (bankdosa) kullanmanı isterse kullanmalı mısın?", 
+                        image: "bankdosan.png", 
+                        answers: [
+                            { text: "Asla", isCorrect: true, feedback: "Doğru! Sadece SEN bankayı aradığında kullan." }, 
+                            { text: "Evet", isCorrect: false, feedback: "Yanlış! Bunu asla yapma." },
+                            { text: "Sadece polis isterse", isCorrect: false, feedback: "Yanlış! Polis de bunu asla istemez." }
+                        ] 
+                    }
+                ],
+                medium: [
+                    { 
+                        question: "Bir SMS alıyorsun: 'Paketiniz gümrükte takıldı, teslimat için 29 kr ödemek üzere buraya tıklayın'. Ne yaparsın?", 
+                        image: "postnordfake.png", 
+                        answers: [
+                            { text: "Linke tıklarım.", isCorrect: false, feedback: "Hayır! Bu kart bilgilerini çalmak için bir tuzak." }, 
+                            { text: "SMS'i silerim.", isCorrect: true, feedback: "Doğru! Paket beklemiyorsan bu bir blöftür." },
+                            { text: "Hangi paket olduğunu sormak için cevaplarım.", isCorrect: false, feedback: "Yanlış! Dolandırıcılık SMS'lerine asla cevap verme." }
+                        ] 
+                    },
+                    { 
+                        question: "BankID aslında nedir?", 
+                        image: "bankid.jpg", 
+                        answers: [
+                            { text: "Facebook'a giriş yapmanın bir yolu.", isCorrect: false, feedback: "Bazen orada kullanılır ama bundan fazlasıdır." }, 
+                            { text: "Dijital imzamdır.", isCorrect: true, feedback: "Aynen öyle! Yasal olarak bağlayıcıdır, tıpkı kalemle imza atmak gibi." },
+                            { text: "Bir virüs koruma uygulaması.", isCorrect: false, feedback: "Yanlış! Bu bir e-kimliktir." }
+                        ] 
+                    },
+                    { 
+                        question: "Facebook Marketplace'te kanepe satıyorsun. Alıcı bir link üzerinden 'kurye' göndermek istiyor. Ne yaparsın?", 
+                        image: "kurir.png", 
+                        answers: [
+                            { text: "Tıklarım.", isCorrect: false, feedback: "Hayır! Bu klasik bir dolandırıcılık." }, 
+                            { text: "İletişimi keserim.", isCorrect: true, feedback: "Doğru! Gerçek alıcılar böyle davranmaz." },
+                            { text: "Kimliklerini sorarım.", isCorrect: false, feedback: "Yanlış! Sahte resim gönderebilirler." }
+                        ] 
+                    },
+                    { 
+                        question: "Facebook'ta tanımadığın birinden arkadaşlık isteği alıyorsun. Ekonomik sıkıntı çektiklerini ve yardıma ihtiyaçları olduğunu söylüyorlar. Ne yaparsın?", 
+                        image: "facebook.png", 
+                        answers: [
+                            { text: "Yardım ederim.", isCorrect: false, feedback: "Dur! Buna aşk dolandırıcılığı denir." }, 
+                            { text: "Engellerim.", isCorrect: true, feedback: "Doğru. Dolandırıcılar duygularınla oynar." },
+                            { text: "Ne kadar lazım diye sorarım.", isCorrect: false, feedback: "Yanlış! İletişime geçme." }
+                        ] 
+                    },
+                    { 
+                        question: "Bir kafede ücretsiz Wi-Fi buldun. Bankana giriş yapmak güvenli mi?", 
+                        image: "wificafe.png", 
+                        answers: [
+                            { text: "Evet.", isCorrect: false, feedback: "Hayır. Açık ağlar dinlenebilir." }, 
+                            { text: "Hayır. Mobil veri kullanırım.", isCorrect: true, feedback: "Aynen! Kendi ağın daha güvenli." },
+                            { text: "Sadece hızlıca bakiyeye bakarsam.", isCorrect: false, feedback: "Yanlış! Verilerini görmek için yeterli bir süre." }
+                        ] 
+                    },
+                    { 
+                        question: "Her yerde aynı şifre kullanmak akıllıca mı?", 
+                        image: "password.png", 
+                        answers: [
+                            { text: "Evet.", isCorrect: false, feedback: "Tehlikeli!" }, 
+                            { text: "Hayır.", isCorrect: true, feedback: "Doğru! En azından e-posta şifreni değiştir." },
+                            { text: "Evet, eğer bir yere yazarsam.", isCorrect: false, feedback: "Yanlış! Bir site hacklenirse risk aynıdır." }
+                        ] 
+                    }
+                ],
+                high: [
+                    { 
+                        question: "Banka arıyor ve hesabının saldırı altında olduğunu söylüyor. BankID'yi başlatıp 'dolandırıcılığı durdurmanı' istiyorlar. Ne yaparsın?", 
+                        image: "imposter.png", 
+                        answers: [
+                            { text: "Dolandırıcıyı durdururum.", isCorrect: false, feedback: "Tam tersi! Onları içeri alıyorsun." }, 
+                            { text: "Girişi onaylarım.", isCorrect: true, feedback: "Doğru. BankID onaylamak/imzalamak içindir, durdurmak için değil." },
+                            { text: "Hiçbir şey olmaz.", isCorrect: false, feedback: "Yanlış! Onlara erişim verirsin." }
+                        ] 
+                    },
+                    { 
+                        question: "Vergi Dairesinden (Skatteverket) para iadesi alacağınla ilgili bir e-posta alıyorsun. Gerçek olduğunu nasıl anlarsın?", 
+                        image: "skatteverketmejl.png", 
+                        answers: [
+                            { text: "Logosu var.", isCorrect: false, feedback: "Logolar kolayca kopyalanır. Bu bir şey ifade etmez." }, 
+                            { text: "Sayfalarımı (Mina Sidor) kontrol ederim.", isCorrect: true, feedback: "Doğru. Resmi siteyi kendin kontrol et." },
+                            { text: "Cevap yazıp gerçek mi diye sorarım.", isCorrect: false, feedback: "Yanlış! Dolandırıcı sadece 'Evet' der." }
+                        ] 
+                    },
+                    { 
+                        question: "Banka yeni güvenli bir sistem hakkında arıyor, ama AnyDesk veya TeamViewer indirmeni istiyor. Ne yaparsın?", 
+                        image: "anydeskteamviewer.jpg", 
+                        answers: [
+                            { text: "İndiririm.", isCorrect: false, feedback: "Uyarı! Bilgisayarının kontrolünü alırlar." }, 
+                            { text: "Telefonu kapatırım.", isCorrect: true, feedback: "Doğru!" },
+                            { text: "Müdürle konuşmak isterim.", isCorrect: false, feedback: "Yanlış! Seni başka bir dolandırıcıya aktarırlar." }
+                        ] 
+                    },
+                    { 
+                        question: "TV'de gördüğün bir ünlü internette Bitcoin reklamı yapıyor. Katılmak güvenli hissettiriyor mu?", 
+                        image: "leif.png", 
+                        answers: [
+                            { text: "İyi şans.", isCorrect: false, feedback: "Hayır, yatırım dolandırıcılığı." }, 
+                            { text: "Dolandırıcılık.", isCorrect: true, feedback: "Doğru." },
+                            { text: "Önce yorumları okurum.", isCorrect: false, feedback: "Yanlış! Yorumlar genellikle sahte hesaplar tarafından yazılır." }
+                        ] 
+                    },
+                    { 
+                        question: "Bankanı Google'da aratıyorsun ve en üstteki sonuçta 'Reklam' (Annons) yazıyor. O linke tıklamak güvenli mi?", 
+                        image: "bankannons.png", 
+                        answers: [
+                            { text: "Tıklarım.", isCorrect: false, feedback: "Hayır! Sahte site olabilir." }, 
+                            { text: "Adresi kendim yazarım.", isCorrect: true, feedback: "Aynen! Doğru yere gittiğinden %100 emin olmanın tek yolu budur." },
+                            { text: "Profesyonel görünüyorsa tıklarım.", isCorrect: false, feedback: "Yanlış! Görünümü kopyalayabilirler." }
+                        ] 
+                    },
+                    { 
+                        question: "BankID kullanırken bazen 'Kendimi tanıtıyorum' (Jag identifierar mig) bazen de 'İmzalıyorum' (Jag skriver under) yazar. Farkı biliyor musun?", 
+                        image: "bankid.jpg", 
+                        answers: [
+                            { text: "Fark yok.", isCorrect: false, feedback: "Büyük fark!" }, 
+                            { text: "İmzalamak bağlayıcıdır.", isCorrect: true, feedback: "Doğru! Ekstra dikkatli ol." },
+                            { text: "Bankaya göre değişir.", isCorrect: false, feedback: "Yanlış! Kurallar herkes için aynıdır." }
+                        ] 
+                    }
+                ]
+            },
+        };
+
+        // Kör vid start
+        setLanguage('sv');
+    </script>
+</body>
+</html>
