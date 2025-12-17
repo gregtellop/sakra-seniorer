@@ -100,9 +100,34 @@
         @keyframes pulse { 50% { transform: scale(1.02); } }
         
         /* Språk */
-        body.lang-ar { font-family: 'Noto Naskh Arabic', serif; direction: rtl; }
-        body.lang-ar .text-left { text-align: right; }
-        #language-menu { direction: ltr; }
+       /* Språk */
+        /* Arabiska inställningar */
+        body.lang-ar { 
+            font-family: 'Noto Naskh Arabic', serif; 
+            /* Vi tar BORT 'direction: rtl' härifrån för att layouten ska vara statisk */
+        }
+
+        /* Men vi tvingar TEXTEN att vara högerställd i Arabiska */
+        body.lang-ar h1, 
+        body.lang-ar h2, 
+        body.lang-ar h3, 
+        body.lang-ar p, 
+        body.lang-ar input,
+        body.lang-ar #feedback-message {
+            direction: rtl;
+            text-align: right;
+        }
+
+        /* Specialfix för knappar i Arabiska: 
+           Vi byter plats på Ikon och Text (flex-reverse) men behåller knappen på sin plats */
+        body.lang-ar .level-button, 
+        body.lang-ar .answer-button {
+            flex-direction: row-reverse; /* Ikonen hamnar till höger */
+            text-align: right;
+        }
+        
+        /* Se till att språkmenyn ALLTID är vänsterställd */
+        #language-menu, #nav-buttons { direction: ltr !important; }
     </style>
 </head>
 <body class="p-2 sm:p-4 min-h-screen flex items-center justify-center text-gray-900 dark:text-gray-100">
