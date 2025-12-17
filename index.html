@@ -30,6 +30,64 @@
     
     <style>
        body { 
+               <div id="login-overlay" class="fixed inset-0 z-[9999] bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-4">
+        <div class="max-w-sm w-full text-center space-y-6">
+            <div class="text-6xl animate-bounce">🔒</div>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Ange kurskoden</h2>
+            <p class="text-gray-600 dark:text-gray-300">För att starta övningen, skriv in koden du fått av kursledaren.</p>
+            
+            <input type="text" id="passcode-input" placeholder="142536" 
+                   class="w-full p-4 text-center text-xl border-2 border-indigo-200 rounded-xl focus:border-indigo-500 outline-none dark:bg-gray-800 dark:text-white uppercase">
+            
+            <button onclick="checkPasscode()" 
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95">
+                LÅS UPP 🔓
+            </button>
+            <p id="error-msg" class="text-red-500 font-bold hidden">Fel kod, försök igen.</p>
+        </div>
+    </div>
+
+    <script>
+        function checkPasscode() {
+            // HÄR BESTÄMMER DU KODEN (skriv den med små bokstäver)
+            const SECRET_CODE = "start"; 
+            
+            const input = document.getElementById('passcode-input');
+            const overlay = document.getElementById('login-overlay');
+            const errorMsg = document.getElementById('error-msg');
+            
+            // Vi gör om det användaren skriver till små bokstäver så det inte spelar roll om de använder CAPS LOCK
+            if (input.value.toLowerCase().trim() === SECRET_CODE) {
+                // Rätt kod! Ta bort gardinen
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 500); // Snygg övergång
+            } else {
+                // Fel kod
+                errorMsg.classList.remove('hidden');
+                input.classList.add('border-red-500');
+                // Skaka på rutan (lite feedback)
+                input.animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(10px)' },
+                    { transform: 'translateX(0)' }
+                ], { duration: 300 });
+            }
+        }
+    </script>
+    ```
+
+### Hur det funkar:
+1.  När sidan laddas täcks allt av en vit ruta med ett hänglås.
+2.  I koden ovan ser du raden: `const SECRET_CODE = "start";`.
+    * Du kan ändra `"start"` till vad du vill, t.ex. `"senior"`, `"huddinge"` eller `"2024"`.
+3.  Seniorerna behöver bara skriva det ordet och trycka "Lås upp".
+4.  Appen minns **inte** att de låst upp om de laddar om sidan (vilket är bra för säkerheten/övningen).
+
+Är detta en bra balans mellan enkelhet och "privat"?
+                
             font-family: 'Atkinson Hyperlegible', sans-serif; 
             
             /* --- 1. BILD FÖR LJUST LÄGE --- */
