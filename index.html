@@ -29,14 +29,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-       body { 
-               <div id="login-overlay" class="fixed inset-0 z-[9999] bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-4">
+       body { <div id="login-overlay" class="fixed inset-0 z-[9999] bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-4">
         <div class="max-w-sm w-full text-center space-y-6">
             <div class="text-6xl animate-bounce">🔒</div>
             <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Ange kurskoden</h2>
             <p class="text-gray-600 dark:text-gray-300">För att starta övningen, skriv in koden du fått av kursledaren.</p>
             
-            <input type="text" id="passcode-input" placeholder="142536" 
+            <input type="text" id="passcode-input" placeholder="Skriv koden här..." 
                    class="w-full p-4 text-center text-xl border-2 border-indigo-200 rounded-xl focus:border-indigo-500 outline-none dark:bg-gray-800 dark:text-white uppercase">
             
             <button onclick="checkPasscode()" 
@@ -50,7 +49,7 @@
     <script>
         function checkPasscode() {
             // HÄR BESTÄMMER DU KODEN (skriv den med små bokstäver)
-            const SECRET_CODE = "start"; 
+            const SECRET_CODE = "seniorer2026"; 
             
             const input = document.getElementById('passcode-input');
             const overlay = document.getElementById('login-overlay');
@@ -78,6 +77,15 @@
         }
     </script>
     ```
+
+### Hur det funkar:
+1.  När sidan laddas täcks allt av en vit ruta med ett hänglås.
+2.  I koden ovan ser du raden: `const SECRET_CODE = "start";`.
+    * Du kan ändra `"start"` till vad du vill, t.ex. `"senior"`, `"huddinge"` eller `"2024"`.
+3.  Seniorerna behöver bara skriva det ordet och trycka "Lås upp".
+4.  Appen minns **inte** att de låst upp om de laddar om sidan (vilket är bra för säkerheten/övningen).
+
+Är detta en bra balans mellan enkelhet och "privat"?
 
 ### Hur det funkar:
 1.  När sidan laddas täcks allt av en vit ruta med ett hänglås.
