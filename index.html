@@ -27,22 +27,43 @@
         /* Grunddesign */
         body { 
             font-family: 'Atkinson Hyperlegible', sans-serif; 
-            background-image: url('bakgrund3.png'); 
-            background-size: cover; background-position: center; background-attachment: fixed;
-            background-color: #f0f9ff;
-            transition: background-color 0.3s;
+            
+            /* --- 1. BILD FÖR LJUST LÄGE --- */
+            /* Byt ut 'day.jpg' mot namnet på din ljusa bild */
+            background-image: url('ljusbakgrund.png'); 
+            background-color: #FDFBF7; /* Fallback-färg om bilden laddar långsamt */
+            transition: background-image 1s ease-in-out, background-color 1s ease-in-out, color 0.5s ease;
+            background-size: cover; 
+            background-position: center;
+            background-attachment: fixed;
+            color: #1f2937;
         }
-        .dark body { background-image: none; background-color: #111827; color: #f3f4f6; }
-
-        /* Kortet */
+       .dark body {
+            /* Byt ut 'night.jpg' mot namnet på din mörka bild */
+            background-image: url('darkback.png'); 
+            
+            background-color: #111827;
+            color: #f3f4f6;
+        }
+        
+        /* Modern Card Design */
         .modern-card {
-            background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
+            /* HÄR ÄR ÄNDRINGEN: */
+            /* 255, 255, 255 är vit. 0.9 betyder 90% synlig (lite genomskinlig) */
+            background-color: rgba(255, 255, 255, 0.8); 
+            
+            /* Detta gör att bakgrunden blir "suddig" bakom kortet (Frosted Glass-effekt) */
+            backdrop-filter: blur(10px);
+            
             border-radius: 1.5rem;
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.15);
-            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.5); /* Lite genomskinlig kant också */
+        
         }
-        .dark .modern-card { background-color: rgba(31, 41, 55, 0.95); border-color: #374151; }
+        .dark .modern-card {
+            background-color: rgba(31, 41, 55, 0.8);
+            border-color: #374151;
+        }
 
         /* Knappar */
         .answer-button {
